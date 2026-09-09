@@ -1,0 +1,1 @@
+"""Maxsurf MCP support package."""

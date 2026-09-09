@@ -1,0 +1,22 @@
+name: Offline verification
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+      - run: python -m pip install -r requirements.lock
+      - run: python -m unittest discover -s tests -t . -v
+      - run: python scripts/validate_release.py
+      - run: python scripts/smoke_stdio.py --python python --entry server.py
+      - run: python scripts/build_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maxsurf-mcp-release-candidate
+          path: dist/*

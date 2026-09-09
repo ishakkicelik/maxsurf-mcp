@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "maxsurf": {
+      "command": "py",
+      "args": [
+        "-3.12",
+        "-I",
+        "-S",
+        "server/launch.py"
+      ],
+      "cwd": ".",
+      "startup_timeout_sec": 60,
+      "tool_timeout_sec": 1800,
+      "env_vars": [
+        "MAXSURF_MCP_WORKSPACE_ROOTS"
+      ],
+      "env": {
+        "MAXSURF_MCP_ATTACH_POLICY": "activate_existing",
+        "MAXSURF_MCP_ENABLE_DIAGNOSTICS": "0",
+        "MAXSURF_MCP_ENABLE_LEGACY": "0"
+      }
+    }
+  }
+}

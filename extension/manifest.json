@@ -1,0 +1,54 @@
+{
+  "manifest_version": "0.3",
+  "name": "maxsurf-mcp",
+  "display_name": "Maxsurf MCP",
+  "version": "0.2.0-rc.5",
+  "description": "Local, guarded COM tools for Maxsurf Modeler, Stability, Resistance, Motions and Multiframe.",
+  "long_description": "Release candidate. Requires separately installed and licensed Maxsurf and Windows x64 CPython 3.12. Includes MCP source and dependencies, not Bentley software or manuals. Live release acceptance is recorded in docs/RELEASE_STATUS.md. Original project code and assets are MIT licensed. Copyright (c) 2026 Ismail Hakki Celik.",
+  "author": {
+    "name": "Ismail Hakki Celik"
+  },
+  "icon": "icon.png",
+  "license": "MIT",
+  "tools_generated": true,
+  "compatibility": {
+    "platforms": [
+      "win32"
+    ],
+    "runtimes": {
+      "python": ">=3.12.0 <3.13.0"
+    }
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "server/launch.py",
+    "mcp_config": {
+      "command": "${user_config.python_path}",
+      "args": [
+        "-I",
+        "-S",
+        "${__dirname}/server/launch.py"
+      ],
+      "env": {
+        "MAXSURF_MCP_WORKSPACE_ROOTS": "${user_config.workspace}",
+        "MAXSURF_MCP_ATTACH_POLICY": "activate_existing",
+        "MAXSURF_MCP_ENABLE_DIAGNOSTICS": "0",
+        "MAXSURF_MCP_ENABLE_LEGACY": "0"
+      }
+    }
+  },
+  "user_config": {
+    "python_path": {
+      "type": "file",
+      "title": "Python 3.12 x64 executable",
+      "description": "Select a trusted 64-bit CPython 3.12 python.exe. The bundle includes dependencies; no project checkout or virtual environment is required.",
+      "required": true
+    },
+    "workspace": {
+      "type": "directory",
+      "title": "Design workspace",
+      "description": "Only designs/exports inside this folder are accessible to normal file tools. Use a dedicated folder, not the whole drive.",
+      "required": true
+    }
+  }
+}

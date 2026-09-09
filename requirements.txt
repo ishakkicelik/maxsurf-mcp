@@ -1,0 +1,9 @@
+﻿# Exact pins for the verified runtime. Kept in step with pyproject.toml.
+# Requires 64-bit CPython 3.12 on Windows; see pyproject.toml for the
+# constraints pip cannot express.
+mcp==1.29.0
+pywin32==312 ; sys_platform == "win32"
+pywinauto==0.6.9
+comtypes==1.4.16
+six==1.17.0
+Pillow==12.3.0

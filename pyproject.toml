@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maxsurf-mcp"
+version = "0.2.0rc5"
+description = "MCP server for Bentley Maxsurf COM automation, with audited and sandboxed tools"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { file = "LICENSE" }
+keywords = ["mcp", "maxsurf", "bentley", "com", "naval-architecture"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Win32 (MS Windows)",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+]
+
+# Pinned to the exact versions this server has been verified against on
+# Windows with Maxsurf 2025 (25.00.02.339). The COM surface is sensitive to
+# pywin32's generated wrappers, so the pin is deliberate rather than a floor.
+dependencies = [
+  "mcp==1.29.0",
+  "pywinauto==0.6.9 ; sys_platform == 'win32'",
+  "comtypes==1.4.16 ; sys_platform == 'win32'",
+  "six==1.17.0",
+  "Pillow==12.3.0",
+  "pywin32==312 ; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+# The offline suite runs on the standard library's unittest, so pytest is a
+# convenience for local runs and is not part of the verified runtime.
+dev = [
+  "pytest>=8.0",
+]
+
+[tool.setuptools]
+packages = ["maxsurf_mcp"]
+py-modules = ["server"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# Requirements that pip cannot express
+# ------------------------------------
+# * Windows only. The server drives Maxsurf through COM.
+# * The interpreter must be 64-bit (CPython "AMD64"). Maxsurf 2025 registers
+#   64-bit COM servers, and a 32-bit interpreter cannot create an in-process
+#   binding to them. Verified on CPython 3.12.13 (MSC v.1944 64 bit, AMD64).
+#   server.startup_report() reports the running interpreter's bitness so a
+#   mismatched install is visible immediately.
+# * Maxsurf must be licensed for COM automation (Advanced or Ultimate).
+
+[project.scripts]
+maxsurf-mcp = "server:main"

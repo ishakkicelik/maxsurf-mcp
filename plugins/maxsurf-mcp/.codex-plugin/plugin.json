@@ -1,0 +1,27 @@
+{
+  "name": "maxsurf-mcp",
+  "version": "0.2.0-rc.5",
+  "description": "Windows-local MCP tools for licensed Maxsurf applications.",
+  "author": {
+    "name": "Ismail Hakki Celik"
+  },
+  "license": "MIT",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Maxsurf MCP",
+    "shortDescription": "Control local Maxsurf through guarded MCP tools",
+    "longDescription": "Release candidate for Modeler, Stability, Resistance, Motions and Multiframe. Requires licensed Maxsurf and Windows x64 Python 3.12. No vessel recipes, design standards or Bentley content included.",
+    "developerName": "Ismail Hakki Celik",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Inspect my running Maxsurf modules without changing any design."
+    ],
+    "brandColor": "#1BA5B5",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  }
+}

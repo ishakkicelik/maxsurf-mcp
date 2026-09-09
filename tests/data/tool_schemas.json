@@ -1,0 +1,2154 @@
+{
+  "add_downflooding_points": {
+    "properties": {
+      "backup_path": {
+        "default": "",
+        "title": "Backup Path",
+        "type": "string"
+      },
+      "clear_first": {
+        "default": false,
+        "title": "Clear First",
+        "type": "boolean"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "points_json": {
+        "title": "Points Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "points_json"
+    ],
+    "title": "add_downflooding_pointsArguments",
+    "type": "object"
+  },
+  "add_marker": {
+    "properties": {
+      "height": {
+        "title": "Height",
+        "type": "number"
+      },
+      "name": {
+        "default": "",
+        "title": "Name",
+        "type": "string"
+      },
+      "offset": {
+        "title": "Offset",
+        "type": "number"
+      },
+      "position": {
+        "title": "Position",
+        "type": "number"
+      },
+      "station_index": {
+        "title": "Station Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "position",
+      "offset",
+      "height",
+      "station_index"
+    ],
+    "title": "add_markerArguments",
+    "type": "object"
+  },
+  "add_modeler_grid_line": {
+    "properties": {
+      "angle": {
+        "default": 0.0,
+        "title": "Angle",
+        "type": "number"
+      },
+      "grid_type": {
+        "title": "Grid Type",
+        "type": "string"
+      },
+      "label": {
+        "title": "Label",
+        "type": "string"
+      },
+      "position": {
+        "title": "Position",
+        "type": "number"
+      }
+    },
+    "required": [
+      "grid_type",
+      "label",
+      "position"
+    ],
+    "title": "add_modeler_grid_lineArguments",
+    "type": "object"
+  },
+  "add_multiframe_elements": {
+    "properties": {
+      "elements_json": {
+        "title": "Elements Json",
+        "type": "string"
+      },
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "elements_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_elementsArguments",
+    "type": "object"
+  },
+  "add_multiframe_loadcase": {
+    "properties": {
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "loads_json": {
+        "title": "Loads Json",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "loads_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_loadcaseArguments",
+    "type": "object"
+  },
+  "add_multiframe_nodes": {
+    "properties": {
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "nodes_json": {
+        "title": "Nodes Json",
+        "type": "string"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "nodes_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_nodesArguments",
+    "type": "object"
+  },
+  "add_multiframe_restraints": {
+    "properties": {
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "restraints_json": {
+        "title": "Restraints Json",
+        "type": "string"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "restraints_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_restraintsArguments",
+    "type": "object"
+  },
+  "add_parametric_surface": {
+    "properties": {
+      "parameters_json": {
+        "title": "Parameters Json",
+        "type": "string"
+      },
+      "shape": {
+        "title": "Shape",
+        "type": "string"
+      }
+    },
+    "required": [
+      "shape",
+      "parameters_json"
+    ],
+    "title": "add_parametric_surfaceArguments",
+    "type": "object"
+  },
+  "add_quadrilateral_surface": {
+    "properties": {
+      "corners_json": {
+        "title": "Corners Json",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "symmetry": {
+        "title": "Symmetry",
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "symmetry",
+      "corners_json"
+    ],
+    "title": "add_quadrilateral_surfaceArguments",
+    "type": "object"
+  },
+  "bond_surfaces": {
+    "properties": {
+      "continuity": {
+        "default": "msBondC0",
+        "title": "Continuity",
+        "type": "string"
+      },
+      "first_edge": {
+        "title": "First Edge",
+        "type": "string"
+      },
+      "first_index": {
+        "title": "First Index",
+        "type": "integer"
+      },
+      "insert_connecting_surface": {
+        "default": false,
+        "title": "Insert Connecting Surface",
+        "type": "boolean"
+      },
+      "second_edge": {
+        "title": "Second Edge",
+        "type": "string"
+      },
+      "second_index": {
+        "title": "Second Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "first_index",
+      "first_edge",
+      "second_index",
+      "second_edge"
+    ],
+    "title": "bond_surfacesArguments",
+    "type": "object"
+  },
+  "calculate_free_surface": {
+    "properties": {
+      "extent_aft": {
+        "default": 3.0,
+        "title": "Extent Aft",
+        "type": "number"
+      },
+      "extent_fwd": {
+        "default": 1.0,
+        "title": "Extent Fwd",
+        "type": "number"
+      },
+      "extent_side": {
+        "default": 2.0,
+        "title": "Extent Side",
+        "type": "number"
+      },
+      "grid_longitudinal": {
+        "default": 160,
+        "title": "Grid Longitudinal",
+        "type": "integer"
+      },
+      "grid_transverse": {
+        "default": 80,
+        "title": "Grid Transverse",
+        "type": "integer"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "speed_knots": {
+        "title": "Speed Knots",
+        "type": "number"
+      }
+    },
+    "required": [
+      "path",
+      "speed_knots"
+    ],
+    "title": "calculate_free_surfaceArguments",
+    "type": "object"
+  },
+  "calculate_hydrostatics": {
+    "properties": {
+      "density": {
+        "default": 1025.0,
+        "title": "Density",
+        "type": "number"
+      },
+      "vcg": {
+        "default": 0.0,
+        "title": "Vcg",
+        "type": "number"
+      }
+    },
+    "title": "calculate_hydrostaticsArguments",
+    "type": "object"
+  },
+  "capture_modeler_view": {
+    "properties": {
+      "expected_window_title": {
+        "title": "Expected Window Title",
+        "type": "string"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path",
+      "expected_window_title"
+    ],
+    "title": "capture_modeler_viewArguments",
+    "type": "object"
+  },
+  "com_constants": {
+    "properties": {
+      "filter": {
+        "default": "",
+        "title": "Filter",
+        "type": "string"
+      },
+      "module": {
+        "default": "modeler",
+        "title": "Module",
+        "type": "string"
+      }
+    },
+    "title": "com_constantsArguments",
+    "type": "object"
+  },
+  "com_describe": {
+    "properties": {
+      "module": {
+        "default": "modeler",
+        "title": "Module",
+        "type": "string"
+      },
+      "path": {
+        "default": "",
+        "title": "Path",
+        "type": "string"
+      },
+      "with_values": {
+        "default": false,
+        "title": "With Values",
+        "type": "boolean"
+      }
+    },
+    "title": "com_describeArguments",
+    "type": "object"
+  },
+  "com_typeinfo": {
+    "properties": {
+      "inherited_depth": {
+        "default": 2,
+        "title": "Inherited Depth",
+        "type": "integer"
+      },
+      "module": {
+        "default": "modeler",
+        "title": "Module",
+        "type": "string"
+      },
+      "path": {
+        "default": "",
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "title": "com_typeinfoArguments",
+    "type": "object"
+  },
+  "configure_modeler_rendering": {
+    "properties": {
+      "expected_window_title": {
+        "title": "Expected Window Title",
+        "type": "string"
+      },
+      "rendered": {
+        "default": true,
+        "title": "Rendered",
+        "type": "boolean"
+      },
+      "show_lines": {
+        "default": true,
+        "title": "Show Lines",
+        "type": "boolean"
+      },
+      "transparent": {
+        "default": false,
+        "title": "Transparent",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "expected_window_title"
+    ],
+    "title": "configure_modeler_renderingArguments",
+    "type": "object"
+  },
+  "configure_motions_analysis": {
+    "properties": {
+      "analysis_type": {
+        "title": "Analysis Type",
+        "type": "string"
+      },
+      "draft_m": {
+        "title": "Draft M",
+        "type": "number"
+      },
+      "gyradius_pitch_m": {
+        "title": "Gyradius Pitch M",
+        "type": "number"
+      },
+      "gyradius_roll_m": {
+        "title": "Gyradius Roll M",
+        "type": "number"
+      },
+      "gyradius_yaw_m": {
+        "title": "Gyradius Yaw M",
+        "type": "number"
+      },
+      "headings_deg_json": {
+        "title": "Headings Deg Json",
+        "type": "string"
+      },
+      "locations_json": {
+        "default": "[]",
+        "title": "Locations Json",
+        "type": "string"
+      },
+      "replace": {
+        "default": false,
+        "title": "Replace",
+        "type": "boolean"
+      },
+      "roll_damping_nondim": {
+        "title": "Roll Damping Nondim",
+        "type": "number"
+      },
+      "spectra_json": {
+        "title": "Spectra Json",
+        "type": "string"
+      },
+      "spectrum_readback_rel_tol": {
+        "default": 1e-08,
+        "title": "Spectrum Readback Rel Tol",
+        "type": "number"
+      },
+      "speeds_knots_json": {
+        "title": "Speeds Knots Json",
+        "type": "string"
+      },
+      "vcg_m": {
+        "title": "Vcg M",
+        "type": "number"
+      },
+      "vessel_type": {
+        "title": "Vessel Type",
+        "type": "string"
+      },
+      "water_density_kg_m3": {
+        "title": "Water Density Kg M3",
+        "type": "number"
+      }
+    },
+    "required": [
+      "headings_deg_json",
+      "speeds_knots_json",
+      "spectra_json",
+      "water_density_kg_m3",
+      "draft_m",
+      "vcg_m",
+      "gyradius_roll_m",
+      "gyradius_pitch_m",
+      "gyradius_yaw_m",
+      "roll_damping_nondim",
+      "analysis_type",
+      "vessel_type"
+    ],
+    "title": "configure_motions_analysisArguments",
+    "type": "object"
+  },
+  "configure_resistance_analysis": {
+    "properties": {
+      "high_knots": {
+        "title": "High Knots",
+        "type": "number"
+      },
+      "low_knots": {
+        "title": "Low Knots",
+        "type": "number"
+      },
+      "methods_json": {
+        "title": "Methods Json",
+        "type": "string"
+      },
+      "replace": {
+        "default": false,
+        "title": "Replace",
+        "type": "boolean"
+      },
+      "slender_body_one_plus_k": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Slender Body One Plus K"
+      }
+    },
+    "required": [
+      "low_knots",
+      "high_knots",
+      "methods_json"
+    ],
+    "title": "configure_resistance_analysisArguments",
+    "type": "object"
+  },
+  "connect_maxsurf": {
+    "properties": {
+      "module": {
+        "default": "modeler",
+        "title": "Module",
+        "type": "string"
+      },
+      "policy": {
+        "default": "",
+        "title": "Policy",
+        "type": "string"
+      },
+      "progid": {
+        "default": "",
+        "title": "Progid",
+        "type": "string"
+      }
+    },
+    "title": "connect_maxsurfArguments",
+    "type": "object"
+  },
+  "create_library_surface": {
+    "properties": {
+      "name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Name"
+      },
+      "shape": {
+        "title": "Shape",
+        "type": "string"
+      }
+    },
+    "required": [
+      "shape"
+    ],
+    "title": "create_library_surfaceArguments",
+    "type": "object"
+  },
+  "define_damage_cases": {
+    "properties": {
+      "cases_json": {
+        "title": "Cases Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "cases_json"
+    ],
+    "title": "define_damage_casesArguments",
+    "type": "object"
+  },
+  "define_loadcase": {
+    "properties": {
+      "backup_path": {
+        "default": "",
+        "title": "Backup Path",
+        "type": "string"
+      },
+      "clear_first": {
+        "default": false,
+        "title": "Clear First",
+        "type": "boolean"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "mass_items_json": {
+        "title": "Mass Items Json",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "tank_fills_json": {
+        "title": "Tank Fills Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "tank_fills_json",
+      "mass_items_json"
+    ],
+    "title": "define_loadcaseArguments",
+    "type": "object"
+  },
+  "define_subdivision": {
+    "properties": {
+      "backup_path": {
+        "default": "",
+        "title": "Backup Path",
+        "type": "string"
+      },
+      "clear_first": {
+        "default": false,
+        "title": "Clear First",
+        "type": "boolean"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "rooms_json": {
+        "title": "Rooms Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "rooms_json"
+    ],
+    "title": "define_subdivisionArguments",
+    "type": "object"
+  },
+  "delete_surface": {
+    "properties": {
+      "expected_name": {
+        "title": "Expected Name",
+        "type": "string"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index",
+      "expected_name"
+    ],
+    "title": "delete_surfaceArguments",
+    "type": "object"
+  },
+  "evaluate_stability_criteria": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "damage_case": {
+        "default": "",
+        "title": "Damage Case",
+        "type": "string"
+      },
+      "first_end": {
+        "title": "First End",
+        "type": "number"
+      },
+      "first_step": {
+        "title": "First Step",
+        "type": "number"
+      },
+      "intact": {
+        "default": true,
+        "title": "Intact",
+        "type": "boolean"
+      },
+      "loadcase_name": {
+        "title": "Loadcase Name",
+        "type": "string"
+      },
+      "second_end": {
+        "title": "Second End",
+        "type": "number"
+      },
+      "second_step": {
+        "title": "Second Step",
+        "type": "number"
+      },
+      "standard": {
+        "title": "Standard",
+        "type": "string"
+      },
+      "start": {
+        "title": "Start",
+        "type": "number"
+      },
+      "third_end": {
+        "title": "Third End",
+        "type": "number"
+      },
+      "third_step": {
+        "title": "Third Step",
+        "type": "number"
+      },
+      "to_starboard": {
+        "default": true,
+        "title": "To Starboard",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "standard",
+      "loadcase_name",
+      "start",
+      "first_end",
+      "first_step",
+      "second_end",
+      "second_step",
+      "third_end",
+      "third_step"
+    ],
+    "title": "evaluate_stability_criteriaArguments",
+    "type": "object"
+  },
+  "export_motions_table": {
+    "properties": {
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "table": {
+        "title": "Table",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path",
+      "table"
+    ],
+    "title": "export_motions_tableArguments",
+    "type": "object"
+  },
+  "export_multiframe_results": {
+    "properties": {
+      "case_index": {
+        "default": 1,
+        "title": "Case Index",
+        "type": "integer"
+      },
+      "limit": {
+        "default": 100,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "method": {
+        "default": "linear",
+        "title": "Method",
+        "type": "string"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "start": {
+        "default": 1,
+        "title": "Start",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "export_multiframe_resultsArguments",
+    "type": "object"
+  },
+  "export_resistance_results": {
+    "properties": {
+      "max_points": {
+        "default": 500,
+        "title": "Max Points",
+        "type": "integer"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "export_resistance_resultsArguments",
+    "type": "object"
+  },
+  "export_stability_image": {
+    "properties": {
+      "height": {
+        "default": 800,
+        "title": "Height",
+        "type": "integer"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "view": {
+        "default": "hmViewPerspective",
+        "title": "View",
+        "type": "string"
+      },
+      "width": {
+        "default": 1200,
+        "title": "Width",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "export_stability_imageArguments",
+    "type": "object"
+  },
+  "flip_surface": {
+    "properties": {
+      "direction": {
+        "title": "Direction",
+        "type": "string"
+      },
+      "duplicate": {
+        "default": false,
+        "title": "Duplicate",
+        "type": "boolean"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "plane_location": {
+        "title": "Plane Location",
+        "type": "number"
+      }
+    },
+    "required": [
+      "index",
+      "direction",
+      "plane_location"
+    ],
+    "title": "flip_surfaceArguments",
+    "type": "object"
+  },
+  "get_control_net": {
+    "properties": {
+      "index": {
+        "default": 1,
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "title": "get_control_netArguments",
+    "type": "object"
+  },
+  "get_frame_of_reference": {
+    "properties": {},
+    "title": "get_frame_of_referenceArguments",
+    "type": "object"
+  },
+  "get_motions_results": {
+    "properties": {
+      "max_combinations": {
+        "default": 200,
+        "title": "Max Combinations",
+        "type": "integer"
+      }
+    },
+    "title": "get_motions_resultsArguments",
+    "type": "object"
+  },
+  "get_motions_status": {
+    "properties": {},
+    "title": "get_motions_statusArguments",
+    "type": "object"
+  },
+  "get_multiframe_results": {
+    "properties": {
+      "case_index": {
+        "default": 1,
+        "title": "Case Index",
+        "type": "integer"
+      },
+      "limit": {
+        "default": 100,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "method": {
+        "default": "linear",
+        "title": "Method",
+        "type": "string"
+      },
+      "start": {
+        "default": 1,
+        "title": "Start",
+        "type": "integer"
+      }
+    },
+    "title": "get_multiframe_resultsArguments",
+    "type": "object"
+  },
+  "get_multiframe_status": {
+    "properties": {},
+    "title": "get_multiframe_statusArguments",
+    "type": "object"
+  },
+  "get_resistance_results": {
+    "properties": {
+      "max_points": {
+        "default": 500,
+        "title": "Max Points",
+        "type": "integer"
+      }
+    },
+    "title": "get_resistance_resultsArguments",
+    "type": "object"
+  },
+  "get_resistance_status": {
+    "properties": {},
+    "title": "get_resistance_statusArguments",
+    "type": "object"
+  },
+  "get_results_table": {
+    "properties": {
+      "module": {
+        "title": "Module",
+        "type": "string"
+      },
+      "table": {
+        "default": "",
+        "title": "Table",
+        "type": "string"
+      }
+    },
+    "required": [
+      "module"
+    ],
+    "title": "get_results_tableArguments",
+    "type": "object"
+  },
+  "get_stability_loadcase_table_headers": {
+    "properties": {},
+    "title": "get_stability_loadcase_table_headersArguments",
+    "type": "object"
+  },
+  "get_surface_properties": {
+    "properties": {
+      "index": {
+        "default": 1,
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "title": "get_surface_propertiesArguments",
+    "type": "object"
+  },
+  "inspect_modeler_display": {
+    "properties": {},
+    "title": "inspect_modeler_displayArguments",
+    "type": "object"
+  },
+  "inspect_surface_topology": {
+    "properties": {
+      "include_bounds": {
+        "default": true,
+        "title": "Include Bounds",
+        "type": "boolean"
+      }
+    },
+    "title": "inspect_surface_topologyArguments",
+    "type": "object"
+  },
+  "invert_surface_normal": {
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index"
+    ],
+    "title": "invert_surface_normalArguments",
+    "type": "object"
+  },
+  "list_criteria_libraries": {
+    "properties": {},
+    "title": "list_criteria_librariesArguments",
+    "type": "object"
+  },
+  "list_markers": {
+    "properties": {
+      "include_surface_error": {
+        "default": false,
+        "title": "Include Surface Error",
+        "type": "boolean"
+      },
+      "limit": {
+        "default": 500,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "start": {
+        "default": 1,
+        "title": "Start",
+        "type": "integer"
+      },
+      "surface_id": {
+        "default": -1,
+        "title": "Surface Id",
+        "type": "integer"
+      }
+    },
+    "title": "list_markersArguments",
+    "type": "object"
+  },
+  "list_modeler_grid": {
+    "properties": {
+      "grid_type": {
+        "default": "all",
+        "title": "Grid Type",
+        "type": "string"
+      },
+      "limit": {
+        "default": 500,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "start": {
+        "default": 1,
+        "title": "Start",
+        "type": "integer"
+      }
+    },
+    "title": "list_modeler_gridArguments",
+    "type": "object"
+  },
+  "list_multiframe_sections": {
+    "properties": {
+      "group": {
+        "default": "",
+        "title": "Group",
+        "type": "string"
+      },
+      "limit": {
+        "default": 50,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "start": {
+        "default": 1,
+        "title": "Start",
+        "type": "integer"
+      }
+    },
+    "title": "list_multiframe_sectionsArguments",
+    "type": "object"
+  },
+  "list_progids": {
+    "properties": {},
+    "title": "list_progidsArguments",
+    "type": "object"
+  },
+  "list_surface_library": {
+    "properties": {},
+    "title": "list_surface_libraryArguments",
+    "type": "object"
+  },
+  "list_surfaces": {
+    "properties": {},
+    "title": "list_surfacesArguments",
+    "type": "object"
+  },
+  "load_motions_data": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "load_motions_dataArguments",
+    "type": "object"
+  },
+  "marker_fit_report": {
+    "properties": {
+      "max_items": {
+        "default": 5000,
+        "title": "Max Items",
+        "type": "integer"
+      },
+      "surface_id": {
+        "default": 0,
+        "title": "Surface Id",
+        "type": "integer"
+      }
+    },
+    "title": "marker_fit_reportArguments",
+    "type": "object"
+  },
+  "move_surface": {
+    "properties": {
+      "duplicate": {
+        "default": false,
+        "title": "Duplicate",
+        "type": "boolean"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "times": {
+        "default": 1,
+        "title": "Times",
+        "type": "integer"
+      },
+      "x": {
+        "title": "X",
+        "type": "number"
+      },
+      "y": {
+        "title": "Y",
+        "type": "number"
+      },
+      "z": {
+        "title": "Z",
+        "type": "number"
+      }
+    },
+    "required": [
+      "index",
+      "x",
+      "y",
+      "z"
+    ],
+    "title": "move_surfaceArguments",
+    "type": "object"
+  },
+  "new_multiframe_model": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      }
+    },
+    "title": "new_multiframe_modelArguments",
+    "type": "object"
+  },
+  "open_design": {
+    "properties": {
+      "confirm_discard": {
+        "default": false,
+        "title": "Confirm Discard",
+        "type": "boolean"
+      },
+      "merge": {
+        "default": false,
+        "title": "Merge",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "save_current": {
+        "default": true,
+        "title": "Save Current",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "open_designArguments",
+    "type": "object"
+  },
+  "open_motions_design": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "open_motions_designArguments",
+    "type": "object"
+  },
+  "open_multiframe_model": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "open_multiframe_modelArguments",
+    "type": "object"
+  },
+  "read_multiframe_model": {
+    "properties": {
+      "limit": {
+        "default": 100,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "start": {
+        "default": 1,
+        "title": "Start",
+        "type": "integer"
+      }
+    },
+    "title": "read_multiframe_modelArguments",
+    "type": "object"
+  },
+  "refresh_modeler_view": {
+    "properties": {
+      "reset_zoom": {
+        "default": true,
+        "title": "Reset Zoom",
+        "type": "boolean"
+      }
+    },
+    "title": "refresh_modeler_viewArguments",
+    "type": "object"
+  },
+  "refresh_multiframe_view": {
+    "properties": {},
+    "title": "refresh_multiframe_viewArguments",
+    "type": "object"
+  },
+  "replace_modeler_grid": {
+    "properties": {
+      "confirm_delete_all": {
+        "default": false,
+        "title": "Confirm Delete All",
+        "type": "boolean"
+      },
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "grid_type": {
+        "title": "Grid Type",
+        "type": "string"
+      },
+      "lines_json": {
+        "title": "Lines Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "grid_type",
+      "lines_json",
+      "expected_count"
+    ],
+    "title": "replace_modeler_gridArguments",
+    "type": "object"
+  },
+  "rescale_surface": {
+    "properties": {
+      "centre_x": {
+        "default": 0.0,
+        "title": "Centre X",
+        "type": "number"
+      },
+      "centre_y": {
+        "default": 0.0,
+        "title": "Centre Y",
+        "type": "number"
+      },
+      "centre_z": {
+        "default": 0.0,
+        "title": "Centre Z",
+        "type": "number"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "scale_x": {
+        "title": "Scale X",
+        "type": "number"
+      },
+      "scale_y": {
+        "title": "Scale Y",
+        "type": "number"
+      },
+      "scale_z": {
+        "title": "Scale Z",
+        "type": "number"
+      }
+    },
+    "required": [
+      "index",
+      "scale_x",
+      "scale_y",
+      "scale_z"
+    ],
+    "title": "rescale_surfaceArguments",
+    "type": "object"
+  },
+  "reset_connection": {
+    "properties": {
+      "module": {
+        "default": "",
+        "title": "Module",
+        "type": "string"
+      }
+    },
+    "title": "reset_connectionArguments",
+    "type": "object"
+  },
+  "rotate_surface": {
+    "properties": {
+      "duplicate": {
+        "default": false,
+        "title": "Duplicate",
+        "type": "boolean"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "long_centre": {
+        "title": "Long Centre",
+        "type": "number"
+      },
+      "pitch": {
+        "title": "Pitch",
+        "type": "number"
+      },
+      "roll": {
+        "title": "Roll",
+        "type": "number"
+      },
+      "times": {
+        "default": 1,
+        "title": "Times",
+        "type": "integer"
+      },
+      "trans_centre": {
+        "title": "Trans Centre",
+        "type": "number"
+      },
+      "vert_centre": {
+        "title": "Vert Centre",
+        "type": "number"
+      },
+      "yaw": {
+        "title": "Yaw",
+        "type": "number"
+      }
+    },
+    "required": [
+      "index",
+      "roll",
+      "pitch",
+      "yaw",
+      "long_centre",
+      "trans_centre",
+      "vert_centre"
+    ],
+    "title": "rotate_surfaceArguments",
+    "type": "object"
+  },
+  "run_motions_analysis": {
+    "properties": {},
+    "title": "run_motions_analysisArguments",
+    "type": "object"
+  },
+  "run_multiframe_analysis": {
+    "properties": {
+      "method": {
+        "default": "linear",
+        "title": "Method",
+        "type": "string"
+      },
+      "modes": {
+        "default": 3,
+        "title": "Modes",
+        "type": "integer"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "unit_token"
+    ],
+    "title": "run_multiframe_analysisArguments",
+    "type": "object"
+  },
+  "run_resistance_analysis": {
+    "properties": {
+      "air_density_kg_m3": {
+        "default": 0.0,
+        "title": "Air Density Kg M3",
+        "type": "number"
+      },
+      "appendage_area_m2": {
+        "default": 0.0,
+        "title": "Appendage Area M2",
+        "type": "number"
+      },
+      "appendage_factor": {
+        "default": 1.0,
+        "title": "Appendage Factor",
+        "type": "number"
+      },
+      "correlation_allowance": {
+        "title": "Correlation Allowance",
+        "type": "number"
+      },
+      "drag_coefficient": {
+        "default": 0.0,
+        "title": "Drag Coefficient",
+        "type": "number"
+      },
+      "frontal_area_m2": {
+        "default": 0.0,
+        "title": "Frontal Area M2",
+        "type": "number"
+      },
+      "headwind_m_per_s": {
+        "default": 0.0,
+        "title": "Headwind M Per S",
+        "type": "number"
+      },
+      "kinematic_viscosity_m2_s": {
+        "title": "Kinematic Viscosity M2 S",
+        "type": "number"
+      },
+      "max_points": {
+        "default": 500,
+        "title": "Max Points",
+        "type": "integer"
+      },
+      "measure_hull": {
+        "default": true,
+        "title": "Measure Hull",
+        "type": "boolean"
+      },
+      "nominal_appendage_length_m": {
+        "default": 0.0,
+        "title": "Nominal Appendage Length M",
+        "type": "number"
+      },
+      "propulsive_efficiency_percent": {
+        "title": "Propulsive Efficiency Percent",
+        "type": "number"
+      },
+      "water_density_kg_m3": {
+        "title": "Water Density Kg M3",
+        "type": "number"
+      }
+    },
+    "required": [
+      "water_density_kg_m3",
+      "kinematic_viscosity_m2_s",
+      "correlation_allowance",
+      "propulsive_efficiency_percent"
+    ],
+    "title": "run_resistance_analysisArguments",
+    "type": "object"
+  },
+  "run_stability_equilibrium": {
+    "properties": {
+      "lcg": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Lcg"
+      },
+      "loadcase_name": {
+        "title": "Loadcase Name",
+        "type": "string"
+      },
+      "mass": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Mass"
+      },
+      "tcg": {
+        "default": 0.0,
+        "title": "Tcg",
+        "type": "number"
+      },
+      "vcg": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Vcg"
+      }
+    },
+    "required": [
+      "loadcase_name"
+    ],
+    "title": "run_stability_equilibriumArguments",
+    "type": "object"
+  },
+  "run_stability_gz": {
+    "properties": {
+      "damage_case": {
+        "default": "",
+        "title": "Damage Case",
+        "type": "string"
+      },
+      "first_end": {
+        "title": "First End",
+        "type": "number"
+      },
+      "first_step": {
+        "title": "First Step",
+        "type": "number"
+      },
+      "loadcase_name": {
+        "title": "Loadcase Name",
+        "type": "string"
+      },
+      "max_points": {
+        "default": 400,
+        "title": "Max Points",
+        "type": "integer"
+      },
+      "second_end": {
+        "title": "Second End",
+        "type": "number"
+      },
+      "second_step": {
+        "title": "Second Step",
+        "type": "number"
+      },
+      "start": {
+        "title": "Start",
+        "type": "number"
+      },
+      "third_end": {
+        "title": "Third End",
+        "type": "number"
+      },
+      "third_step": {
+        "title": "Third Step",
+        "type": "number"
+      },
+      "to_starboard": {
+        "default": true,
+        "title": "To Starboard",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "loadcase_name",
+      "start",
+      "first_end",
+      "first_step",
+      "second_end",
+      "second_step",
+      "third_end",
+      "third_step"
+    ],
+    "title": "run_stability_gzArguments",
+    "type": "object"
+  },
+  "save_design": {
+    "properties": {
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      },
+      "path": {
+        "default": "",
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "title": "save_designArguments",
+    "type": "object"
+  },
+  "save_motions_state": {
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "save_motions_stateArguments",
+    "type": "object"
+  },
+  "save_multiframe_model": {
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "save_multiframe_modelArguments",
+    "type": "object"
+  },
+  "save_stability_rooms": {
+    "properties": {
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "save_stability_roomsArguments",
+    "type": "object"
+  },
+  "session_status": {
+    "properties": {},
+    "title": "session_statusArguments",
+    "type": "object"
+  },
+  "set_assembly_visibility": {
+    "properties": {
+      "assembly_name": {
+        "title": "Assembly Name",
+        "type": "string"
+      },
+      "visible": {
+        "title": "Visible",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "assembly_name",
+      "visible"
+    ],
+    "title": "set_assembly_visibilityArguments",
+    "type": "object"
+  },
+  "set_control_point": {
+    "properties": {
+      "column": {
+        "title": "Column",
+        "type": "integer"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "longitudinal": {
+        "title": "Longitudinal",
+        "type": "number"
+      },
+      "offset": {
+        "title": "Offset",
+        "type": "number"
+      },
+      "row": {
+        "title": "Row",
+        "type": "integer"
+      },
+      "vertical": {
+        "title": "Vertical",
+        "type": "number"
+      }
+    },
+    "required": [
+      "index",
+      "row",
+      "column",
+      "longitudinal",
+      "offset",
+      "vertical"
+    ],
+    "title": "set_control_pointArguments",
+    "type": "object"
+  },
+  "set_control_points": {
+    "properties": {
+      "points_json": {
+        "title": "Points Json",
+        "type": "string"
+      },
+      "surface_index": {
+        "title": "Surface Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "surface_index",
+      "points_json"
+    ],
+    "title": "set_control_pointsArguments",
+    "type": "object"
+  },
+  "set_frame_of_reference": {
+    "properties": {
+      "aft_perp": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Aft Perp"
+      },
+      "auto_from_hull": {
+        "default": "",
+        "title": "Auto From Hull",
+        "type": "string"
+      },
+      "baseline": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Baseline"
+      },
+      "confirm": {
+        "default": false,
+        "title": "Confirm",
+        "type": "boolean"
+      },
+      "datum_wl": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Datum Wl"
+      },
+      "draft_m": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Draft M"
+      },
+      "fwd_perp": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Fwd Perp"
+      },
+      "long_datum": {
+        "default": "",
+        "title": "Long Datum",
+        "type": "string"
+      },
+      "midships": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Midships"
+      },
+      "other_long_datum": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Other Long Datum"
+      },
+      "other_vert_datum": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Other Vert Datum"
+      },
+      "vert_datum": {
+        "default": "",
+        "title": "Vert Datum",
+        "type": "string"
+      }
+    },
+    "title": "set_frame_of_referenceArguments",
+    "type": "object"
+  },
+  "set_heel_range": {
+    "properties": {
+      "first_end": {
+        "title": "First End",
+        "type": "number"
+      },
+      "first_step": {
+        "title": "First Step",
+        "type": "number"
+      },
+      "second_end": {
+        "title": "Second End",
+        "type": "number"
+      },
+      "second_step": {
+        "title": "Second Step",
+        "type": "number"
+      },
+      "start": {
+        "title": "Start",
+        "type": "number"
+      },
+      "third_end": {
+        "title": "Third End",
+        "type": "number"
+      },
+      "third_step": {
+        "title": "Third Step",
+        "type": "number"
+      },
+      "to_starboard": {
+        "default": true,
+        "title": "To Starboard",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "start",
+      "first_end",
+      "first_step",
+      "second_end",
+      "second_step",
+      "third_end",
+      "third_step"
+    ],
+    "title": "set_heel_rangeArguments",
+    "type": "object"
+  },
+  "set_marker": {
+    "properties": {
+      "expected_name": {
+        "title": "Expected Name",
+        "type": "string"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "properties_json": {
+        "title": "Properties Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "index",
+      "expected_name",
+      "properties_json"
+    ],
+    "title": "set_markerArguments",
+    "type": "object"
+  },
+  "set_modeler_grid_line": {
+    "properties": {
+      "angle": {
+        "default": 0.0,
+        "title": "Angle",
+        "type": "number"
+      },
+      "expected_label": {
+        "title": "Expected Label",
+        "type": "string"
+      },
+      "grid_type": {
+        "title": "Grid Type",
+        "type": "string"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "label": {
+        "title": "Label",
+        "type": "string"
+      },
+      "position": {
+        "title": "Position",
+        "type": "number"
+      }
+    },
+    "required": [
+      "grid_type",
+      "index",
+      "expected_label",
+      "label",
+      "position"
+    ],
+    "title": "set_modeler_grid_lineArguments",
+    "type": "object"
+  },
+  "set_section_split": {
+    "properties": {
+      "expected_before": {
+        "title": "Expected Before",
+        "type": "integer"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index",
+      "expected_before"
+    ],
+    "title": "set_section_splitArguments",
+    "type": "object"
+  },
+  "set_surface_properties": {
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "properties_json": {
+        "title": "Properties Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "index",
+      "properties_json"
+    ],
+    "title": "set_surface_propertiesArguments",
+    "type": "object"
+  },
+  "surface_summary": {
+    "properties": {
+      "index": {
+        "default": 1,
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "title": "surface_summaryArguments",
+    "type": "object"
+  },
+  "transfer_modeler_to_motions": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      }
+    },
+    "title": "transfer_modeler_to_motionsArguments",
+    "type": "object"
+  },
+  "transfer_modeler_to_resistance": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      }
+    },
+    "title": "transfer_modeler_to_resistanceArguments",
+    "type": "object"
+  },
+  "transfer_modeler_to_stability": {
+    "properties": {
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      }
+    },
+    "title": "transfer_modeler_to_stabilityArguments",
+    "type": "object"
+  },
+  "unbond_surface": {
+    "properties": {
+      "edge": {
+        "title": "Edge",
+        "type": "string"
+      },
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index",
+      "edge"
+    ],
+    "title": "unbond_surfaceArguments",
+    "type": "object"
+  }
+}

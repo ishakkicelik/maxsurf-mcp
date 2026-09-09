@@ -1,0 +1,20 @@
+{
+  "name": "maxsurf-local",
+  "interface": {
+    "displayName": "Maxsurf Local"
+  },
+  "plugins": [
+    {
+      "name": "maxsurf-mcp",
+      "source": {
+        "source": "local",
+        "path": "./plugins/maxsurf-mcp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
