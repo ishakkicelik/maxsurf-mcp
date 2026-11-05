@@ -15,7 +15,9 @@ from .errors import MaxsurfAnalysisError, MaxsurfCOMError, MaxsurfSafetyError, M
 from .guard import guarded, register
 
 UNIT_NAMES = ("Length", "Angle", "Displacement", "AngularDisplacement", "Force", "Moment",
-              "Udl", "Stress", "Mass", "MassPerLength", "Area", "Inertia", "Modulus")
+              "Udl", "Stress", "Mass", "MassPerLength", "Area", "Inertia", "Modulus",
+              "Density", "Spring", "TorsionSpring", "Temperature", "TemperatureCoeff",
+              "RotationalMass", "Velocity", "Acceleration", "Warping")
 COUNTS = ("nodes", "Elements", "restraints", "springs", "nodeMasses", "nodeLinkGroups", "LoadCases")
 FLAGS = ("Linear", "Nonlinear", "Modal", "Buckling", "TimeHistory")
 DOFS = ("mfDOFx", "mfDOFy", "mfDOFz", "mfDOFthetax", "mfDOFthetay", "mfDOFthetaz")
@@ -337,28 +339,43 @@ def add_multiframe_loadcase(name: str, loads_json: str, expected_count: int, uni
     return com.to_json({"index":lc.Index,"name":name,"loads":len(rows),**state})
 
 @guarded(classification=Classification.EXECUTE_ANALYSIS, module="multiframe", channel=Channel.MCP_COM)
-def run_multiframe_analysis(unit_token: str, method: str = "linear", modes: int = 3) -> str:
-    """EXECUTE_ANALYSIS. Run a 3D linear static or distributed-mass modal analysis.
+def run_multiframe_analysis(unit_token: str, method: str = "linear", modes: int = 3,
+                            mass_formulation: str = "distributed") -> str:
+    """EXECUTE_ANALYSIS. Run a 3D linear static or explicit-mass modal analysis.
 
     Other analysis flags are turned off and read back. Modal needs element or
-    nodal mass. Native success is not a design-code or ship-structure verdict.
+    nodal mass. coverage_complete compares every frame case or requested mode
+    with solved results; partial coverage is reported explicitly. Native success
+    is not a design-code or ship-structure verdict.
     """
     if method not in ("linear","modal"):raise MaxsurfValidationError("Only linear and modal runners are implemented")
+    if mass_formulation not in ("distributed","lumped"):
+        raise MaxsurfValidationError("Unsupported modal mass formulation")
     _integer(modes,"modes",1,30);app,f=_app();state=_unit_guard(app,unit_token)
     if _count(f.nodes)<2 or _count(f.Elements)<1 or _count(f.restraints)<1:raise MaxsurfValidationError("Model needs nodes, beams and supports")
+    # Native mfLoadCaseType contains static, combined and self-weight cases;
+    # all belong to the linear result family, not only mflcStatic.
+    intended = list(range(1, _count(f.LoadCases)+1)) if method == "linear" else list(range(1, modes+1))
     before={n:getattr(f.Analysis,n) for n in FLAGS}
     for n in FLAGS:setattr(f.Analysis,n,n==("Linear" if method=="linear" else "Modal"))
     for n in FLAGS:_equal(getattr(f.Analysis,n),n==("Linear" if method=="linear" else "Modal"),n)
     if method=="modal":
-        val.stored(f.Analysis.ModalSettings,"DistributedMass",True)
-        _equal(f.Analysis.ModalSettings.LumpedMass,False,"LumpedMass")
+        selected="DistributedMass" if mass_formulation=="distributed" else "LumpedMass"
+        val.stored(f.Analysis.ModalSettings,selected,True)
+        opposite="LumpedMass" if mass_formulation=="distributed" else "DistributedMass"
+        _equal(getattr(f.Analysis.ModalSettings,opposite),False,opposite)
         val.stored(f.Analysis.ModalSettings,"Modes",modes)
     native_return = _native_completed(_read("Analysis.Analyse",lambda:f.Analysis.Analyse(True)),"Analysis.Analyse")
     family=f.Results.Linear if method=="linear" else f.Results.Modal
     count=_count(family.Cases)
     solved=[i for i in range(1,count+1) if _read(f"{method}.Cases({i}).Solved",lambda:family.Cases.Item(i).Solved) is True]
     if not solved:raise MaxsurfAnalysisError("Solver returned without any solved result case")
+    missing = [i for i in intended if i not in solved]
     return com.to_json({"method":method,"native_return":native_return,"solved_cases":solved,
+                       "requested_cases":intended,"missing_cases":missing,
+                       "coverage_complete":bool(intended) and not missing,
+                       "coverage_status":"complete" if intended and not missing else "partial",
+                       "requested_modes":modes if method=="modal" else None,
                        "previous_flags":before,"engineering_verdict":"not_evaluated",**state})
 
 @guarded(classification=Classification.READ, module="multiframe", channel=Channel.MCP_COM)

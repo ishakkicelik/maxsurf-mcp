@@ -2,6 +2,11 @@
 
 This guide covers Maxsurf MCP **0.2.0-rc.5** on Windows. Choose one installation method per client: a packaged extension/plugin, or a source-based MCP connection.
 
+The expanded checkout exposes 144 default tools. Use the source setup below or
+locally rebuilt packages for these additions; older downloaded archives retain
+their original 90-tool contents. Advanced discovery, diagnostic effect modes
+and native limitations are documented in [Native automation](NATIVE_AUTOMATION.md).
+
 Original project code and documentation are [MIT licensed](../LICENSE), Copyright (c) 2026 Ismail Hakki Celik. Your Bentley entitlement is separate.
 
 ## Before installation
@@ -179,7 +184,11 @@ Use this alternative only in a fresh source directory. No environment activation
 .\.venv\Scripts\python.exe .\scripts\smoke_stdio.py --python .\.venv\Scripts\python.exe --entry .\server.py
 ```
 
-Expected output includes version `0.2.0-rc.5`, `90` tools, `session_status: pass` and `consent_refusal: pass`. This check exercises the actual MCP protocol and a refusal before COM connection; **no Bentley application needs to be opened for it**.
+Expected output includes version `0.2.0-rc.5`, the tool count for this checkout,
+`session_status: pass` and `consent_refusal: pass`. The check compares the actual
+protocol schemas with `tests/data/tool_schemas.json`; an old fixed tool count
+does not certify an expanded checkout. **No Bentley application needs to be
+opened for it**.
 
 Then choose one of the two client configurations below. Do not run `server.py` in a separate terminal for normal use: the MCP client starts the process and owns its input/output connection.
 
@@ -231,6 +240,39 @@ Add a `maxsurf` entry under `mcpServers`. If other servers are present, merge th
 
 Save the JSON, fully exit and reopen Claude Desktop, then start a new conversation. This is an alternative to the MCPB extension; avoid enabling both copies in the same client. The configuration location and Developer menu are described in the [official MCP local-server guide](https://modelcontextprotocol.io/docs/develop/connect-local-servers).
 
+## Other AI coding agents
+
+Any client that supports local MCP over stdio can launch this source checkout.
+Use the absolute virtual-environment Python executable as `command` and the
+absolute `server.py` path as its sole argument. Set the design workspace through
+the client's child-process environment, not in an unrelated terminal:
+
+```json
+{
+  "command": "C:/MaxsurfSource/.venv/Scripts/python.exe",
+  "args": ["C:/MaxsurfSource/server.py"],
+  "env": {
+    "MAXSURF_MCP_WORKSPACE_ROOTS": "C:/MaxsurfDesigns",
+    "MAXSURF_MCP_ATTACH_POLICY": "activate_existing",
+    "MAXSURF_MCP_ENABLE_DIAGNOSTICS": "0",
+    "MAXSURF_MCP_ENABLE_LEGACY": "0"
+  }
+}
+```
+
+The surrounding configuration key is client-specific; the command, arguments
+and environment are the stdio process contract. Keep stdout connected to the
+client's JSON-RPC transport and drain stderr. Allow up to 1800 seconds for solver
+tool calls; a native timeout abandons the wait, not the native operation.
+Run `scripts/smoke_stdio.py` with the same executable and entry point before
+registering the server. Do not configure an interpreter that lacks the installed
+dependencies, or depend on shell activation.
+
+For multiple workspace roots on Windows, separate absolute paths with `;`.
+`activate_existing` requires the relevant application to be running and retains
+the existing process/identity checks. Choose `launch_if_absent` explicitly only
+when the agent should be allowed to start an application.
+
 ## First connection check
 
 For a first model inspection, manually open **Maxsurf Modeler** and finish any native startup/license dialogs. Keep other modules closed unless your task requires them.
@@ -253,6 +295,14 @@ For another task, open and connect only the relevant application:
 | Open-water resistance | Maxsurf Resistance | `resistance` |
 | Seakeeping | Maxsurf Motions | `motions` |
 | Structural frame analysis | Multiframe | `multiframe` |
+| VPP's native UI/accessibility interface only | Maxsurf VPP | `vpp` |
+| Shape Editor's native XMLGrid interface only | Shape Editor | `shape_editor` |
+
+The last two roots are verified against installed 2026 type information, not
+typed vessel/rig or section-library modeling APIs. VPP has no proven `Design`
+object, and Shape Editor exposes XMLGrid rather than an engineering Application
+interface. Their connections must not be presented as full solver control.
+`vpp_xmlgrid` is a helper that requires an existing `vpp` session.
 
 Check identity, units and current inputs before requesting changes. A connection or populated tool list is not solver-result validation. For display-control tools, separate permission and a supported visible Modeler window are required; they are not part of this initial connection check.
 

@@ -25,12 +25,27 @@ async def run(python, entry, bundle, plugin_root=None):
             status=await session.call_tool('session_status',{})
             # This is refused BEFORE connecting to an application.
             refusal=await session.call_tool('transfer_modeler_to_stability',{'confirm_replace':False})
-            assert not status.isError
-            assert refusal.isError
-            assert init.serverInfo.version=='0.2.0-rc.5'
-            assert len(tools.tools)==90
+            invalid_index = await session.call_tool('surface_summary', {'index': True})
+            unknown_option = await session.call_tool('session_status', {'unknown_option': True})
+            for label, result, error in (
+                    ("session_status", status, False),
+                    ("consent refusal", refusal, True),
+                    ("Boolean index refusal", invalid_index, True),
+                    ("unknown argument refusal", unknown_option, True)):
+                if result.isError != error:
+                    raise RuntimeError(f"{label}: expected isError={error}")
+            if init.serverInfo.version != '0.2.0-rc.5':
+                raise RuntimeError(f"Unexpected server version: {init.serverInfo.version}")
+            expected = json.loads(
+                (Path(__file__).resolve().parents[1] / "tests" / "data"
+                 / "tool_schemas.json").read_text(encoding="utf-8")
+            )
+            if (len(tools.tools) != len(expected)
+                    or {tool.name: tool.inputSchema for tool in tools.tools} != expected):
+                raise RuntimeError("Tool schema snapshot differs")
             print(json.dumps({'protocol':init.protocolVersion,'server':init.serverInfo.model_dump(),
-                              'tools':len(tools.tools),'session_status':'pass','consent_refusal':'pass'}))
+                              'tools':len(tools.tools),'session_status':'pass','consent_refusal':'pass',
+                              'raw_input_validation':'pass'}))
 
 
 if __name__=='__main__':

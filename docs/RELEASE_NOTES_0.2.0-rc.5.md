@@ -18,7 +18,13 @@ For Claude, select the MCPB during installation, then select `python.exe` and a 
 
 ## Verification and limitations
 
-This build exposes 90 default tools. Recorded offline and native checks are described in [Verification](VERIFICATION.md); outstanding work is listed in [Release status](RELEASE_STATUS.md). A successful installation or connection is not an engineering validation.
+The original release candidate exposed 90 default tools. The expanded source
+checkout exposes 144 default tools and seven opt-in diagnostics, including
+installed API discovery, validated native invocation and bounded collection
+enumeration. Older archives do not automatically acquire these changes.
+Recorded offline and native checks are described in [Verification](VERIFICATION.md);
+remaining engineering acceptance gates are listed in [Release status](RELEASE_STATUS.md).
+A successful installation or connection is not an engineering validation.
 
 Native persistence, consistent cross-program engineering inputs, complete damaged stability, broader Motions/structural acceptance and clean-user client installation still have open gates. See those reports before evaluating the package.
 

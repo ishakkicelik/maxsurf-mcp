@@ -1,9 +1,26 @@
 # Capability and acceptance matrix
 
-Version 0.2.0-rc.5 exposes **90 default tools**. Tool count is not a percentage of
-Maxsurf coverage. Hundreds of native API members and GUI workflows remain
-outside these bounded adapters. No claim of "every use of every application"
-is made. Complete schemas are in `tests/data/tool_schemas.json`.
+This expanded 0.2.0-rc.5 source exposes **144 default tools**, plus seven diagnostic
+tools when explicitly enabled. Tool count is not a percentage of Maxsurf
+coverage. Installed native contracts are exhaustively discoverable and callable
+through the validated extension where their Automation representation and
+object route exist. GUI-only and unsupported workflows remain explicit rather
+than fabricated. See [native coverage and effect boundaries](NATIVE_AUTOMATION.md).
+Complete default schemas are in `tests/data/tool_schemas.json`.
+
+## Source expansion
+
+| Area | Added controls | Evidence boundary |
+| --- | --- | --- |
+| Geometry files | Rhino 3DM, IGES, DGN, DXF, PDstrip, MOSES, native OBJ/STL/OFF/PLY/GDF/nuShallo trimesh formats | Closed member mappings, workspace/overwrite checks, file evidence; not universal dialect fidelity |
+| Modeling | Four native tube generators, linked geometry, area properties, stricter control-net readback and transform/duplicate checks | Native control-point and translation checks; API limits remain visible |
+| Trimeshes | Surface meshing, properties/statistics, transforms, normals, cleaning/repair, join/union/intersection and deletion | No fabricated node/triangle mutation or Boolean difference |
+| Hydrostatics | Settings/results, exact 13-argument transform and advanced transforms | Native units/unsupported targets stated; target achievement is separate acceptance |
+| Stability | Trim/fluid/density policies, conditional keypoints, result exports, companion inputs, current-install criteria | Stored values verified; regulatory approval not claimed |
+| Resistance | Measurements/form factor, measurements persistence, free-surface import/export, velocity cross-checks | Solver and format acceptance remain project-specific |
+| Motions | Frequency/formulation/vessel settings, selected-condition/RAO import/export, location readback | Protected legacy/solver sequences remain refused |
+| Multiframe | Element controls/loads, units/modal controls, masses/springs/node links, auxiliary reads, truthful result coverage | Array/unit interpretation and full numerical acceptance need native evidence |
+| Native access | Paginated seven-library inventory, exact member contracts, validated invocation, scoped object handles and registered helper construction | ABI validation is not engineering acceptance; advanced unmapped effects are explicitly marked |
 
 | Area | Implemented adapter scope | Verification and limits |
 | --- | --- | --- |
@@ -20,15 +37,17 @@ is made. Complete schemas are in `tests/data/tool_schemas.json`.
 | Resistance | Transfer, method/speed selection, physical inputs, native calculation, result read/export, free surface | RC5 new-concept 81-point curve rerun; full same-vessel loading and empirical applicability acceptance remain open |
 | Motions | Direct open/transfer, companion-data load, .skd save, explicit inputs, strip/legacy RADIF runner, native table export | One sample strip run and selected Summary/COM values matched; .skr save disabled after timeout; modern MOSES execution not implemented |
 | Motions external workflows | Discovery can report MOSES/MARTEC/imported-RAO enums | Runner deliberately refuses those workflows; their native setup is not implemented |
-| Multiframe | 14 tools: native units/files, nodes/beams/supports/nodal loading, linear and experimental modal analysis, paged JSON export | Static benchmark/save/open/reanalysis and two-mode test; third-mode access, oriented-support persistence and broader FE workflows unresolved; see [scope](MULTIFRAME.md) |
-| Other suite programs | Installation/help catalogued for Shape Editor, VPP and Rhino integration | No default adapters for these products; scanning manuals does not add tool coverage |
+| Multiframe | Native units/files, nodes/beams/supports, nodal/element loading, structural auxiliaries, linear and experimental modal analysis, paged JSON export | Static benchmark/save/open/reanalysis and two-mode test; third-mode access, oriented-support persistence and broader FE workflows unresolved; see [scope](MULTIFRAME.md) |
+| Other suite programs | Installed VPP and Shape Editor contracts included in discovery and diagnostic automation | No semantic vessel/rig or section-construction runner is established; metadata availability does not prove engineering execution |
 
 ## What the bridge does not supply
 
 - Ship recipes, class-rule design decisions, automatic compliant tank/compartment
   assignment, optimized hull generation or LLM training datasets.
-- Every native file import/export, independent curve fitting/editing, frames/
-  decks/stringers/plates fabrication workflows or arbitrary UI automation.
+- Uniform format fidelity or dedicated semantic adapters for every native file
+  format, independent curve fitting/editing, or complete frames/decks/stringers/
+  plates fabrication workflows. Accessible native contracts remain discoverable
+  through diagnostic automation; that route does not establish workflow acceptance.
 - A complete native analysis project backup/restore, transaction rollback,
   solver cancellation, or guaranteed result freshness after external GUI edits.
 - Seaworthiness, regulatory certification, optimum performance or engineering

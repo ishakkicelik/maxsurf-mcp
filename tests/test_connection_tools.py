@@ -269,7 +269,8 @@ class CompatibilityTests(IsolatedEnvTestCase):
 
     def test_the_progid_hints_still_describe_the_application_modules(self):
         self.assertEqual(sorted(com.PROGID_HINTS),
-                         ["modeler", "motions", "multiframe", "resistance", "stability"])
+                         ["modeler", "motions", "multiframe", "resistance",
+                          "shape_editor", "stability", "vpp"])
         self.assertEqual(com.PROGID_HINTS["modeler"][0], MODELER_PROGID)
 
     def test_probe_still_distinguishes_absent_from_failing_members(self):

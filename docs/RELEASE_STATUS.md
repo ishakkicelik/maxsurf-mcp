@@ -3,9 +3,23 @@
 Review: 2026-09-08 UTC. **Technical preview, not a fully accepted production release.**
 No GitHub upload, catalogue submission or client-settings change is performed.
 
+## Expanded source verification: 2026-10-11
+
+This checkout extends the original preview to 144 default tools and seven opt-in
+diagnostic tools. Source/locked-runtime protocol validation and expanded offline
+regressions were run locally. Installed 2026 wrapper checks are separately
+executable; native Modeler MCP geometry, files, persistence and validated
+automation calls were exercised. All four other analysis applications reached
+their documented initialization state while their sessions were retained.
+
+This does not replace the historical numerical acceptance below or claim every
+solver/GUI workflow was executed. The exhaustive inventory and documented
+boundaries are in [Native automation](NATIVE_AUTOMATION.md). No existing public
+archive was uploaded or replaced.
+
 ## Recorded acceptance scope
 
-The build exposes 90 default tools. Native static beam analysis, result export,
+The original release build exposed 90 default tools. Native static beam analysis, result export,
 .mfd save/open/reanalysis and a two-mode calculation were tested through MCP.
 Stability load-case handling and native PNG dimension reporting are also covered
 by the recorded checks. See [verification](VERIFICATION.md) and

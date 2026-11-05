@@ -69,7 +69,7 @@ class _FakeSurface:
             (2, 2): (10.0, 2.0, 3.0),
         }))
         object.__setattr__(self, "calls", [])
-        object.__setattr__(self, "readonly", set())
+        object.__setattr__(self, "readonly", {"AssemblyName"})
         object.__setattr__(self, "owner", None)
         object.__setattr__(self, "bonds", {})
 
@@ -180,15 +180,30 @@ class _FakeSurfaces:
 
     def Bond(self, i1, e1, i2, e2, continuity, insert):  # noqa: N802
         self.bond_calls.append((i1, e1, i2, e2, continuity, insert))
-        self.items[i1 - 1].bonds[e1] = (self.items[i2 - 1].Name, e2)
-        self.items[i2 - 1].bonds[e2] = (self.items[i1 - 1].Name, e1)
         if insert:
-            surface = _FakeSurface("connector")
-            surface.owner = self.items
-            self.items.append(surface)
+            connector = _FakeSurface("connector")
+            connector.owner = self.items
+            self.items.append(connector)
+            first_connector_edge, second_connector_edge = 1, 2
+            self.items[i1 - 1].bonds[e1] = (
+                connector.Name, first_connector_edge)
+            connector.bonds[first_connector_edge] = (
+                self.items[i1 - 1].Name, e1)
+            self.items[i2 - 1].bonds[e2] = (
+                connector.Name, second_connector_edge)
+            connector.bonds[second_connector_edge] = (
+                self.items[i2 - 1].Name, e2)
+        else:
+            self.items[i1 - 1].bonds[e1] = (self.items[i2 - 1].Name, e2)
+            self.items[i2 - 1].bonds[e2] = (self.items[i1 - 1].Name, e1)
 
     def Unbond(self, index, edge):  # noqa: N802
         self.unbond_calls.append((index, edge))
+        target = self.items[index - 1].bonds.pop(edge, None)
+        if target:
+            for item in self.items:
+                if item.Name == target[0]:
+                    item.bonds.pop(target[1], None)
 
     def AddQuadrilateralFromCorners(self, name, symmetry, *coords):  # noqa: N802
         self.quad_calls.append((name, symmetry, coords))
@@ -218,6 +233,31 @@ class SurfaceTestCase(IsolatedEnvTestCase):
 
 
 class TransformTests(SurfaceTestCase):
+    def test_duplicate_with_wrong_translation_is_rejected(self):
+        collection, surface = self.one()
+        def wrong_copy(*args):
+            collection.items.append(_FakeSurface("wrong", points=surface.points))
+        with mock.patch.object(surface, "Move", side_effect=wrong_copy):
+            with self.assertRaises(MaxsurfCOMError):
+                surf.move_surface(1, 5, 0, 0, True)
+
+    def test_silent_move_and_rescale_are_rejected(self):
+        for method, call in (
+            ("Move", lambda: surf.move_surface(1, 1, 2, 3)),
+            ("ReScale", lambda: surf.rescale_surface(1, 2, 3, 4)),
+        ):
+            with self.subTest(method=method):
+                _, surface = self.one()
+                with mock.patch.object(surface, method, return_value=None):
+                    with self.assertRaises(MaxsurfCOMError):
+                        call()
+
+    def test_duplicate_count_must_match_requested_times(self):
+        _, surface = self.one()
+        # The fake native Rotate makes one clone, so requesting two must fail.
+        with self.assertRaises(MaxsurfCOMError):
+            surf.rotate_surface(1, 0, 0, 30, 0, 0, 0, True, 2)
+
     def test_move_translates_and_proves_it_with_the_control_net(self):
         _c, surface = self.one()
         payload = json.loads(server.move_surface(1, 5.0, 0.0, -1.0))
@@ -460,6 +500,64 @@ class AssemblyVisibilityTests(SurfaceTestCase):
 
 
 class ConstructionTests(SurfaceTestCase):
+    def test_all_four_tube_generators_preserve_native_order_and_all_indices(self):
+        for shape in ("tube180", "tube90", "tube180_start_end",
+                      "tube90_start_end"):
+            with self.subTest(shape=shape):
+                collection = self.patch(_FakeSurfaces())
+                parameters = {name: float(n + 1)
+                              for n, name in enumerate(surf.PARAMETRIC_SHAPES[shape])}
+                parameters.update(name="tube", close_ends=True,
+                                  symmetry="msSSTAsymmetric",
+                                  radius_outer=3.0, radius_inner=1.0)
+                if "orient" in parameters:
+                    parameters["orient"] = "msDTLongitudinal"
+                member = surf.PARAMETRIC_MEMBERS[shape]
+                def add(*args):
+                    for n in range(4):
+                        collection.items.append(_FakeSurface(f"tube {n}"))
+                native = mock.Mock(side_effect=add)
+                setattr(collection, member, native)
+                payload = json.loads(surf.add_parametric_surface(
+                    shape, json.dumps(parameters)))
+                expected = [
+                    1 if name in ("orient", "symmetry") else parameters[name]
+                    for name in surf.PARAMETRIC_SHAPES[shape]
+                ]
+                self.assertEqual(native.call_args.args, tuple(expected))
+                self.assertEqual(payload["created_indices"], [1, 2, 3, 4])
+
+    def test_invalid_tube_radii_fail_before_mutation(self):
+        collection = self.patch(_FakeSurfaces())
+        params = dict.fromkeys(surf.PARAMETRIC_SHAPES["tube180"], 1.0)
+        params.update(name="tube", orient="msDTLongitudinal",
+                      symmetry="msSSTAsymmetric", close_ends=False)
+        with self.assertRaises(MaxsurfValidationError):
+            surf.add_parametric_surface("tube180", json.dumps(params))
+        self.assertEqual(collection.Count, 0)
+
+    def test_assembly_name_is_rejected_before_other_properties_are_written(self):
+        _, surface = self.one()
+        with self.assertRaises(MaxsurfValidationError):
+            surf.set_surface_properties(
+                1, json.dumps({"name": "changed", "assembly_name": "Deck"}))
+        self.assertEqual(surface.Name, "surface")
+
+    def test_unbond_rejects_a_silent_native_noop(self):
+        collection = self.patch(
+            _FakeSurfaces([_FakeSurface("a"), _FakeSurface("b")]))
+        collection.Bond(1, 3, 2, 2, 1, False)
+        with mock.patch.object(collection, "Unbond", return_value=None):
+            with self.assertRaises(MaxsurfCOMError):
+                surf.unbond_surface(1, "msEdgeRight")
+
+    def test_unbond_verifies_released_constraint(self):
+        collection = self.patch(
+            _FakeSurfaces([_FakeSurface("a"), _FakeSurface("b")]))
+        collection.Bond(1, 3, 2, 2, 1, False)
+        payload = json.loads(surf.unbond_surface(1, "msEdgeRight"))
+        self.assertTrue(payload["bond_readback_verified"])
+        self.assertEqual(collection(1).BondedToWhichEdge(3), 0)
     CORNERS = {
         "bottom_right": [0.0, 1.0, 0.0], "bottom_left": [0.0, -1.0, 0.0],
         "top_left": [10.0, -1.0, 5.0], "top_right": [10.0, 1.0, 5.0],
@@ -529,6 +627,100 @@ class ConstructionTests(SurfaceTestCase):
             insert_connecting_surface=True))
         self.assertEqual(collection.Count, 3)
         self.assertEqual(payload["surfaces_created"], 1)
+        self.assertTrue(payload["bond_readback_verified"])
+        self.assertTrue(payload["connector_topology_verified"])
+        connector = collection(3)
+        self.assertEqual(connector.BondedToWhichSurface(1), "a")
+        self.assertEqual(connector.BondedToWhichSurface(2), "b")
+
+    def test_unrelated_old_neighbors_do_not_verify_a_connector(self):
+        first, second = _FakeSurface("a"), _FakeSurface("b")
+        first.bonds[3] = ("old-a-neighbor", 2)
+        second.bonds[2] = ("old-b-neighbor", 4)
+        collection = self.patch(_FakeSurfaces([first, second]))
+
+        def unrelated_bond(i1, e1, i2, e2, continuity, insert):
+            collection.items.append(_FakeSurface("connector"))
+
+        with mock.patch.object(collection, "Bond", side_effect=unrelated_bond):
+            payload = json.loads(server.bond_surfaces(
+                1, "msEdgeRight", 2, "msEdgeLeft", "msBondC0",
+                insert_connecting_surface=True))
+        self.assertFalse(payload["bond_readback_verified"])
+        self.assertFalse(payload["connector_topology_verified"])
+
+    def test_one_sided_connector_does_not_verify_topology(self):
+        collection = self.patch(
+            _FakeSurfaces([_FakeSurface("a"), _FakeSurface("b")]))
+
+        def one_sided_bond(i1, e1, i2, e2, continuity, insert):
+            connector = _FakeSurface("connector")
+            collection.items.append(connector)
+            collection(i1).bonds[e1] = (connector.Name, 1)
+            connector.bonds[1] = (collection(i1).Name, e1)
+            collection(i2).bonds[e2] = (connector.Name, 2)
+
+        with mock.patch.object(collection, "Bond", side_effect=one_sided_bond):
+            payload = json.loads(server.bond_surfaces(
+                1, "msEdgeRight", 2, "msEdgeLeft", "msBondC0",
+                insert_connecting_surface=True))
+        self.assertFalse(payload["bond_readback_verified"])
+        self.assertFalse(payload["connector_topology_verified"])
+
+    def test_disconnected_connectors_do_not_verify_topology(self):
+        first, second = _FakeSurface("a"), _FakeSurface("b")
+        collection = self.patch(_FakeSurfaces([first, second]))
+
+        def disconnected_bond(i1, e1, i2, e2, continuity, insert):
+            left, right = _FakeSurface("left connector"), _FakeSurface("right connector")
+            collection.items.extend([left, right])
+            first.bonds[e1] = (left.Name, 1)
+            left.bonds[1] = (first.Name, e1)
+            second.bonds[e2] = (right.Name, 2)
+            right.bonds[2] = (second.Name, e2)
+
+        with mock.patch.object(collection, "Bond", side_effect=disconnected_bond):
+            payload = json.loads(server.bond_surfaces(
+                1, "msEdgeRight", 2, "msEdgeLeft", "msBondC0",
+                insert_connecting_surface=True))
+        self.assertFalse(payload["connector_topology_verified"])
+
+    def test_connector_insertion_does_not_assume_appended_indices(self):
+        collection = self.patch(
+            _FakeSurfaces([_FakeSurface("a"), _FakeSurface("b")]))
+        native_bond = collection.Bond
+
+        def insert_before_sources(*arguments):
+            native_bond(*arguments)
+            collection.items.insert(0, collection.items.pop())
+
+        with mock.patch.object(collection, "Bond", side_effect=insert_before_sources):
+            payload = json.loads(server.bond_surfaces(
+                1, "msEdgeRight", 2, "msEdgeLeft", "msBondC0",
+                insert_connecting_surface=True))
+        self.assertTrue(payload["connector_topology_verified"])
+        self.assertEqual(payload["created_surface_names"], ["connector"])
+
+    def test_reciprocal_connector_chain_verifies_topology(self):
+        first, second = _FakeSurface("a"), _FakeSurface("b")
+        collection = self.patch(_FakeSurfaces([first, second]))
+
+        def chained_bond(i1, e1, i2, e2, continuity, insert):
+            left, right = _FakeSurface("left connector"), _FakeSurface("right connector")
+            collection.items.extend([left, right])
+            first.bonds[e1] = (left.Name, 1)
+            left.bonds[1] = (first.Name, e1)
+            left.bonds[2] = (right.Name, 3)
+            right.bonds[3] = (left.Name, 2)
+            second.bonds[e2] = (right.Name, 2)
+            right.bonds[2] = (second.Name, e2)
+
+        with mock.patch.object(collection, "Bond", side_effect=chained_bond):
+            payload = json.loads(server.bond_surfaces(
+                1, "msEdgeRight", 2, "msEdgeLeft", "msBondC0",
+                insert_connecting_surface=True))
+        self.assertTrue(payload["connector_topology_verified"])
+        self.assertEqual(payload["surfaces_created"], 2)
 
     def test_bonding_an_edge_to_itself_is_refused(self):
         collection = self.patch(_FakeSurfaces([_FakeSurface("a")]))

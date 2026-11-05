@@ -161,6 +161,28 @@ MODULES: dict[str, ModuleSpec] = {
         kind="helper",
         requires_session="motions",
     ),
+    "vpp": ModuleSpec(
+        name="vpp",
+        progids=("BentleyVPP.Application",),
+        application_iid="{7BD743F7-C109-4D2E-91B5-68ECD7203A63}",
+        design_object_member="",
+        executables=("MaxsurfVPP.exe",),
+    ),
+    "vpp_xmlgrid": ModuleSpec(
+        name="vpp_xmlgrid",
+        progids=("BentleyVPP.XMLGrid.1",),
+        kind="helper",
+        application_iid="{673C093B-49AD-42E4-B27B-CF44955BF7D5}",
+        design_object_member="",
+        requires_session="vpp",
+    ),
+    "shape_editor": ModuleSpec(
+        name="shape_editor",
+        progids=("SectionMaker.XMLGrid.1",),
+        application_iid="{5B1535B3-AE67-4C54-85F2-547813DC1848}",
+        design_object_member="",
+        executables=("ShapeEditor.exe",),
+    ),
 }
 
 #: Candidate members for the application version. Probed, never assumed: the

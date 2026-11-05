@@ -114,7 +114,7 @@ DEFAULT_SURFACES = [
 
 
 class _FakePreferences:
-    """Precision is documented put-only, so reading it must not silently work."""
+    """Exercise readable precision and a failing native precision getter."""
 
     def __init__(self, readable: bool = False):
         self._readable = readable
@@ -123,7 +123,7 @@ class _FakePreferences:
     def Precision(self):  # noqa: N802 - COM naming
         if self._readable:
             return 3
-        raise OSError("Precision is write-only")
+        raise OSError("Precision getter failed")
 
 
 class _FakeApp:
@@ -337,7 +337,7 @@ class PreconditionTests(HydrostaticsTestCase):
         payload = self.run_tool(_FakeApp(_FakeHydrostatics()))
         precision = payload["preconditions"]["precision"]
         self.assertEqual(precision["status"], "unavailable")
-        self.assertIn("put-only", precision["detail"])
+        self.assertIsNone(precision["value"])
         self.assertTrue(any("precision setting could not be read" in w
                             for w in payload["warnings"]))
 
@@ -370,6 +370,11 @@ class PreconditionTests(HydrostaticsTestCase):
 
 
 class EnvelopeTests(HydrostaticsTestCase):
+    def test_zero_vcg_does_not_prove_gm_datum(self):
+        payload = self.run_tool(_FakeApp(_FakeHydrostatics()))
+        self.assertEqual(payload["vcg_contract"]["status"], "neutral")
+        self.assertEqual(payload["vcg_contract"]["datum_status"], "unproven")
+
     def test_the_coefficient_convention_is_always_declared_unknown(self):
         payload = self.run_tool(_FakeApp(_FakeHydrostatics()))
         self.assertEqual(payload["convention_status"], "unknown")

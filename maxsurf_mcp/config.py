@@ -88,6 +88,8 @@ DEFAULT_ATTACH_POLICY = ACTIVATE_EXISTING
 DEFAULT_ALLOWED_MODULES = (
     "modeler", "stability", "stability_xmlgrid", "resistance",
     "motions", "motions_xmlgrid", "multiframe",
+    # 2026 metadata proves these roots, not a vessel/section solver API.
+    "vpp", "vpp_xmlgrid", "shape_editor",
 )
 
 _TRUE = {"1", "true", "yes", "on"}

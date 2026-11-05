@@ -1,8 +1,31 @@
 # Default tool catalog: 0.2.0-rc.5
 
-90 tools. Default surface only; diagnostics and legacy mutation remain opt-in.
+144 tools in this expanded source. Default surface only; diagnostics and legacy
+mutation remain opt-in. Older release archives may contain the original 90.
 See the client schema for all arguments and safety preconditions, and
 [capabilities](CAPABILITIES.md) for native acceptance limits. No design rules included.
+
+## Expanded workflow tools
+
+The argument schemas remain the machine-consumed authority.
+[Native automation](NATIVE_AUTOMATION.md) documents the opt-in extension and limits.
+
+| Group | Added default tools |
+| --- | --- |
+| Native discovery | `discover_native_api`, `get_native_api_member` |
+| Geometry files | `export_modeler_file`, `import_modeler_file` |
+| Linked surfaces | `get_surface_linked_geometry`, `get_surface_area_properties`, `create_linked_geometry_surface` |
+| Meshes | `list_meshes`, `get_mesh_statistics`, `get_mesh_enums`, `mesh_surface_edge_length`, `mesh_surface_parametric`, `set_mesh_properties`, `move_mesh`, `rotate_mesh`, `scale_mesh`, `flip_mesh`, `invert_mesh_normals`, `repair_mesh`, `clean_mesh`, `combine_meshes`, `delete_mesh` |
+| Hydrostatics | `get_hydrostatic_settings`, `set_hydrostatic_settings`, `get_hydrostatic_results`, `transform_hydrostatics`, `advanced_transform_hydrostatics` |
+| Stability | `set_stability_trim`, `set_stability_fluid_mode`, `set_stability_density`, `define_conditional_keypoints`, `export_stability_results_table`, `open_stability_companion` |
+| Resistance | `set_resistance_measurements`, `set_resistance_form_factor`, `open_resistance_measurements`, `save_resistance_measurements`, `import_resistance_free_surface`, `export_resistance_free_surface` |
+| Motions | `set_motions_frequency_range`, `set_motions_formulation`, `set_motions_vessel_settings`, `export_motions_condition_table`, `export_motions_rao_text`, `import_motions_rao_text` |
+| Multiframe | `get_multiframe_element_controls`, `set_multiframe_element_controls`, `add_multiframe_element_loads`, `set_multiframe_modal_controls`, `set_multiframe_units`, `read_multiframe_auxiliary_objects`, `add_multiframe_node_masses`, `add_multiframe_springs`, `add_multiframe_node_link` |
+
+Additional diagnostics: `native_call`, `native_enumerate`, `create_native_object`,
+`release_native_handles`. They require the diagnostic environment switch and
+explicit native-effect acknowledgment. They are not part of the default schema
+snapshot or the legacy tier.
 
 ## com
 

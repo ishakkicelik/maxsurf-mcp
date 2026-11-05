@@ -183,6 +183,25 @@ class ReadToolTests(GeometryToolTestCase):
 
 
 class SetControlPointTests(GeometryToolTestCase):
+    def test_invalid_coordinates_never_write(self):
+        surface = _rectangle()
+        self.patch(_FakeSurfaces([surface]))
+        for bad in (True, None, "1", float("nan"), float("inf"), -float("inf")):
+            with self.subTest(value=bad):
+                with self.assertRaises(MaxsurfValidationError):
+                    server.set_control_point(1, 1, 1, bad, 2.0, 0.0)
+        self.assertEqual(surface.set_calls, [])
+
+    def test_silent_refusal_is_not_success_but_requested_noop_is(self):
+        surface = _rectangle()
+        self.patch(_FakeSurfaces([surface]))
+        with mock.patch.object(surface, "SetControlPoint", return_value=None):
+            with self.assertRaises(MaxsurfCOMError) as caught:
+                server.set_control_point(1, 1, 1, 5.0, 2.0, 0.0)
+            self.assertEqual(caught.exception.details["set_control_point_calls"], 1)
+            payload = json.loads(server.set_control_point(1, 1, 1, 0.0, 2.0, 0.0))
+            self.assertEqual(payload["before"], payload["after"])
+
     def test_bounds_are_validated_before_the_single_write(self):
         surface = _rectangle()
         self.patch(_FakeSurfaces([surface]))
@@ -211,6 +230,82 @@ class SetControlPointTests(GeometryToolTestCase):
 
 
 class BulkControlPointTests(GeometryToolTestCase):
+    def test_original_indices_and_all_coordinates_are_validated(self):
+        surface = _rectangle()
+        self.patch(_FakeSurfaces([surface]))
+        invalid = [
+            {"r": value, "c": 1, "x": 4.0}
+            for value in (True, 1.9, "1", None)
+        ] + [
+            {"r": 1, "c": value, "x": 4.0}
+            for value in (True, 1.9, "1", None)
+        ] + [
+            {"r": 1, "c": 2, axis: value}
+            for axis in ("x", "y", "z")
+            for value in (True, None, "4", float("nan"), float("inf"))
+        ]
+        for point in invalid:
+            with self.subTest(point=point):
+                with self.assertRaises(MaxsurfValidationError):
+                    server.set_control_points(1, json.dumps([
+                        {"r": 2, "c": 2, "x": 5.0}, point,
+                    ]))
+                self.assertEqual(surface.set_calls, [])
+
+    def test_duplicate_targets_are_rejected_before_mutation(self):
+        surface = _rectangle()
+        self.patch(_FakeSurfaces([surface]))
+        with self.assertRaises(MaxsurfValidationError):
+            server.set_control_points(1, json.dumps([
+                {"r": 1, "c": 1, "x": 4.0},
+                {"r": 1, "c": 1, "y": 6.0},
+            ]))
+        self.assertEqual(surface.set_calls, [])
+
+    def test_readback_failure_separates_verified_points_from_completed_calls(self):
+        surface = _rectangle()
+        self.patch(_FakeSurfaces([surface]))
+        original = surface.SetControlPoint
+
+        def set_or_refuse(row, column, *coordinates):
+            if (row, column) != (1, 2):
+                original(row, column, *coordinates)
+
+        with mock.patch.object(surface, "SetControlPoint", side_effect=set_or_refuse):
+            with self.assertRaises(MaxsurfCOMError) as caught:
+                server.set_control_points(1, json.dumps([
+                    {"r": 1, "c": 1, "x": 4.0},
+                    {"r": 1, "c": 2, "x": 6.0},
+                    {"r": 2, "c": 1, "x": 8.0},
+                ]))
+        self.assertEqual(caught.exception.details["applied_before_failure"], 1)
+        self.assertEqual(caught.exception.details["completed_set_calls"], 2)
+        self.assertEqual(surface.points[(1, 1)][0], 4.0)
+        self.assertEqual(surface.points[(2, 1)][0], 0.0)
+
+    def test_failed_readback_reports_completed_write_and_uncertain_state(self):
+        surface = _rectangle()
+        self.patch(_FakeSurfaces([surface]))
+        original_get = surface.GetControlPoint
+
+        def read_until_modified(*args):
+            if surface.set_calls:
+                raise OSError("native readback unavailable")
+            return original_get(*args)
+
+        with mock.patch.object(surface, "GetControlPoint", side_effect=read_until_modified):
+            with self.assertRaises(MaxsurfCOMError) as caught:
+                server.set_control_points(1, '[{"r":1,"c":1,"x":5}]')
+        self.assertEqual(caught.exception.details["applied_before_failure"], 0)
+        self.assertEqual(caught.exception.details["completed_set_calls"], 1)
+        self.assertTrue(caught.exception.details["geometry_may_be_modified"])
+        self.assertEqual(surface.points[(1, 1)][0], 5.0)
+
+    def test_non_string_payload_is_typed_validation_failure(self):
+        self.patch(_FakeSurfaces([_rectangle()]))
+        with self.assertRaises(MaxsurfValidationError):
+            server.set_control_points(1, None)
+
     def test_all_points_are_validated_before_any_write(self):
         surface = _rectangle()
         self.patch(_FakeSurfaces([surface]))

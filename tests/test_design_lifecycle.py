@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import json
+import hashlib
+from pathlib import Path
 import types
 import unittest
 from unittest import mock
 
 import server
 from maxsurf_mcp.audit import Classification, Outcome
-from maxsurf_mcp.errors import MaxsurfSafetyError, MaxsurfValidationError
+from maxsurf_mcp.errors import MaxsurfCOMError, MaxsurfSafetyError, MaxsurfValidationError
 
 from .support import IsolatedEnvTestCase
 
@@ -26,6 +28,7 @@ class _DesignRecorder:
 
     def SaveAs(self, path: str, overwrite: bool) -> None:
         self.calls.append(("SaveAs", path, overwrite))
+        Path(path).write_bytes(b"native design fixture")
 
 
 class _ManagedSession:
@@ -133,6 +136,42 @@ class OpenDesignTests(DesignLifecycleTestCase):
 
 
 class SaveDesignTests(DesignLifecycleTestCase):
+    def test_unchanged_existing_file_cannot_prove_a_silent_native_save(self):
+        # Given: an old nonempty output that native can leave untouched.
+        target = self.workspace_file("unchanged.msd", "old native content")
+        def no_write(path, overwrite):
+            self.design.calls.append(("SaveAs", path, overwrite))
+        # When: native returns and reports the expected identity without writing.
+        with mock.patch.object(self.design, "SaveAs", no_write):
+            with self.assertRaises(MaxsurfCOMError):
+                server.save_design(str(target), overwrite=True)
+        # Then: old output is preserved, not presented as new file evidence.
+        self.assertEqual(target.read_text(), "old native content")
+
+    def test_save_reports_nonempty_file_evidence(self):
+        target = self.workspace_path("evidence.msd")
+        payload = json.loads(server.save_design(str(target)))
+        self.assertEqual(payload["file"], {
+            "path": str(target), "bytes": len(b"native design fixture"),
+            "sha256": hashlib.sha256(b"native design fixture").hexdigest(),
+        })
+
+    def test_missing_or_empty_output_is_not_success(self):
+        for empty in (False, True):
+            with self.subTest(empty=empty):
+                target = self.workspace_path(f"empty-{empty}.msd")
+
+                def save_without_content(path, overwrite):
+                    self.design.calls.append(("SaveAs", path, overwrite))
+                    if empty:
+                        Path(path).write_bytes(b"")
+
+                with mock.patch.object(self.design, "SaveAs", save_without_content):
+                    with self.assertRaises(MaxsurfCOMError) as caught:
+                        server.save_design(str(target))
+                self.assertTrue(caught.exception.details["save_as_returned"])
+                self.assertEqual(self.session.design_path, str(target))
+
     def test_in_place_save_is_disabled(self):
         for empty in ("", "   "):
             with self.subTest(path=empty):

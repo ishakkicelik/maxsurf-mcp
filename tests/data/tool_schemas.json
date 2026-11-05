@@ -1,5 +1,1524 @@
 {
+  "discover_native_api": {
+    "properties": {
+      "module": {
+        "default": "all",
+        "title": "Module",
+        "type": "string"
+      },
+      "offset": {
+        "default": 0,
+        "title": "Offset",
+        "type": "integer"
+      },
+      "limit": {
+        "default": 100,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "kind": {
+        "default": "all",
+        "title": "Kind",
+        "type": "string"
+      },
+      "inventory_digest": {
+        "default": "",
+        "title": "Inventory Digest",
+        "type": "string"
+      }
+    },
+    "title": "discover_native_apiArguments",
+    "type": "object",
+    "additionalProperties": false
+  },
+  "get_native_api_member": {
+    "properties": {
+      "module": {
+        "title": "Module",
+        "type": "string"
+      },
+      "interface": {
+        "title": "Interface",
+        "type": "string"
+      },
+      "member": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          }
+        ],
+        "title": "Member"
+      },
+      "invocation_kind": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "default": 1,
+        "title": "Invocation Kind"
+      }
+    },
+    "required": [
+      "module",
+      "interface",
+      "member"
+    ],
+    "title": "get_native_api_memberArguments",
+    "type": "object",
+    "additionalProperties": false
+  },
+  "get_hydrostatic_settings": {
+    "additionalProperties": false,
+    "properties": {},
+    "title": "get_hydrostatic_settingsArguments",
+    "type": "object"
+  },
+  "set_hydrostatic_settings": {
+    "additionalProperties": false,
+    "properties": {
+      "trimming": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Trimming"
+      },
+      "precision": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Precision"
+      }
+    },
+    "title": "set_hydrostatic_settingsArguments",
+    "type": "object"
+  },
+  "get_hydrostatic_results": {
+    "additionalProperties": false,
+    "properties": {},
+    "title": "get_hydrostatic_resultsArguments",
+    "type": "object"
+  },
+  "transform_hydrostatics": {
+    "additionalProperties": false,
+    "properties": {
+      "target_lcb": {
+        "title": "Target Lcb",
+        "type": "number"
+      },
+      "target_coefficient": {
+        "title": "Target Coefficient",
+        "type": "number"
+      },
+      "target_mac": {
+        "title": "Target Mac",
+        "type": "number"
+      },
+      "target_displacement": {
+        "title": "Target Displacement",
+        "type": "number"
+      },
+      "target_immersed_depth": {
+        "title": "Target Immersed Depth",
+        "type": "number"
+      },
+      "target_beam": {
+        "title": "Target Beam",
+        "type": "number"
+      },
+      "target_lwl": {
+        "title": "Target Lwl",
+        "type": "number"
+      },
+      "constrain_mac": {
+        "title": "Constrain Mac",
+        "type": "boolean"
+      },
+      "constrain_displacement": {
+        "title": "Constrain Displacement",
+        "type": "boolean"
+      },
+      "constrain_lwl": {
+        "title": "Constrain Lwl",
+        "type": "boolean"
+      },
+      "constrain_beam": {
+        "title": "Constrain Beam",
+        "type": "boolean"
+      },
+      "constrain_immersed_depth": {
+        "title": "Constrain Immersed Depth",
+        "type": "boolean"
+      },
+      "optimise_block_coefficient": {
+        "title": "Optimise Block Coefficient",
+        "type": "boolean"
+      },
+      "density": {
+        "default": 1025,
+        "title": "Density",
+        "type": "number"
+      }
+    },
+    "required": [
+      "target_lcb",
+      "target_coefficient",
+      "target_mac",
+      "target_displacement",
+      "target_immersed_depth",
+      "target_beam",
+      "target_lwl",
+      "constrain_mac",
+      "constrain_displacement",
+      "constrain_lwl",
+      "constrain_beam",
+      "constrain_immersed_depth",
+      "optimise_block_coefficient"
+    ],
+    "title": "transform_hydrostaticsArguments",
+    "type": "object"
+  },
+  "advanced_transform_hydrostatics": {
+    "additionalProperties": false,
+    "properties": {
+      "targets_json": {
+        "title": "Targets Json",
+        "type": "string"
+      },
+      "density": {
+        "default": 1025,
+        "title": "Density",
+        "type": "number"
+      }
+    },
+    "required": [
+      "targets_json"
+    ],
+    "title": "advanced_transform_hydrostaticsArguments",
+    "type": "object"
+  },
+  "set_stability_trim": {
+    "additionalProperties": false,
+    "properties": {
+      "mode": {
+        "title": "Mode",
+        "type": "string"
+      },
+      "value_m": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value M"
+      }
+    },
+    "required": [
+      "mode"
+    ],
+    "title": "set_stability_trimArguments",
+    "type": "object"
+  },
+  "set_stability_fluid_mode": {
+    "additionalProperties": false,
+    "properties": {
+      "mode": {
+        "title": "Mode",
+        "type": "string"
+      }
+    },
+    "required": [
+      "mode"
+    ],
+    "title": "set_stability_fluid_modeArguments",
+    "type": "object"
+  },
+  "set_stability_density": {
+    "additionalProperties": false,
+    "properties": {
+      "fluid": {
+        "title": "Fluid",
+        "type": "string"
+      },
+      "density_kg_m3": {
+        "title": "Density Kg M3",
+        "type": "number"
+      }
+    },
+    "required": [
+      "fluid",
+      "density_kg_m3"
+    ],
+    "title": "set_stability_densityArguments",
+    "type": "object"
+  },
+  "define_conditional_keypoints": {
+    "additionalProperties": false,
+    "properties": {
+      "points_json": {
+        "title": "Points Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "points_json"
+    ],
+    "title": "define_conditional_keypointsArguments",
+    "type": "object"
+  },
+  "export_stability_results_table": {
+    "additionalProperties": false,
+    "properties": {
+      "table": {
+        "title": "Table",
+        "type": "string"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "table",
+      "path"
+    ],
+    "title": "export_stability_results_tableArguments",
+    "type": "object"
+  },
+  "open_stability_companion": {
+    "additionalProperties": false,
+    "properties": {
+      "kind": {
+        "title": "Kind",
+        "type": "string"
+      },
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "kind",
+      "path"
+    ],
+    "title": "open_stability_companionArguments",
+    "type": "object"
+  },
+  "set_motions_frequency_range": {
+    "additionalProperties": false,
+    "properties": {
+      "automatic": {
+        "title": "Automatic",
+        "type": "boolean"
+      },
+      "count": {
+        "title": "Count",
+        "type": "integer"
+      },
+      "start_native": {
+        "default": 0,
+        "title": "Start Native",
+        "type": "number"
+      },
+      "end_native": {
+        "default": 0,
+        "title": "End Native",
+        "type": "number"
+      }
+    },
+    "required": [
+      "automatic",
+      "count"
+    ],
+    "title": "set_motions_frequency_rangeArguments",
+    "type": "object"
+  },
+  "set_motions_formulation": {
+    "additionalProperties": false,
+    "properties": {
+      "use_transom_terms": {
+        "title": "Use Transom Terms",
+        "type": "boolean"
+      },
+      "wave_force_method": {
+        "title": "Wave Force Method",
+        "type": "string"
+      },
+      "added_resistance_method": {
+        "title": "Added Resistance Method",
+        "type": "string"
+      }
+    },
+    "required": [
+      "use_transom_terms",
+      "wave_force_method",
+      "added_resistance_method"
+    ],
+    "title": "set_motions_formulationArguments",
+    "type": "object"
+  },
+  "set_motions_vessel_settings": {
+    "additionalProperties": false,
+    "properties": {
+      "draft_aft_m": {
+        "title": "Draft Aft M",
+        "type": "number"
+      },
+      "draft_fwd_m": {
+        "title": "Draft Fwd M",
+        "type": "number"
+      },
+      "additional_heave_pitch_damping_nondim": {
+        "title": "Additional Heave Pitch Damping Nondim",
+        "type": "number"
+      },
+      "demihull_spacing_m": {
+        "title": "Demihull Spacing M",
+        "type": "number"
+      },
+      "sections": {
+        "title": "Sections",
+        "type": "integer"
+      },
+      "mapping_terms": {
+        "title": "Mapping Terms",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "draft_aft_m",
+      "draft_fwd_m",
+      "additional_heave_pitch_damping_nondim",
+      "demihull_spacing_m",
+      "sections",
+      "mapping_terms"
+    ],
+    "title": "set_motions_vessel_settingsArguments",
+    "type": "object"
+  },
+  "export_motions_condition_table": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "table": {
+        "title": "Table",
+        "type": "string"
+      },
+      "speed_index": {
+        "title": "Speed Index",
+        "type": "integer"
+      },
+      "heading_index": {
+        "title": "Heading Index",
+        "type": "integer"
+      },
+      "spectrum_index": {
+        "title": "Spectrum Index",
+        "type": "integer"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      },
+      "location_index": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Location Index"
+      },
+      "frequency_index": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Frequency Index"
+      },
+      "section_index": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Section Index"
+      }
+    },
+    "required": [
+      "path",
+      "table",
+      "speed_index",
+      "heading_index",
+      "spectrum_index"
+    ],
+    "title": "export_motions_condition_tableArguments",
+    "type": "object"
+  },
+  "export_motions_rao_text": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "speed_index": {
+        "default": 1,
+        "title": "Speed Index",
+        "type": "integer"
+      },
+      "heading_index": {
+        "default": 1,
+        "title": "Heading Index",
+        "type": "integer"
+      },
+      "multi_condition": {
+        "default": false,
+        "title": "Multi Condition",
+        "type": "boolean"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "export_motions_rao_textArguments",
+    "type": "object"
+  },
+  "import_motions_rao_text": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "multi_condition": {
+        "default": false,
+        "title": "Multi Condition",
+        "type": "boolean"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "import_motions_rao_textArguments",
+    "type": "object"
+  },
+  "get_multiframe_element_controls": {
+    "additionalProperties": false,
+    "properties": {
+      "element_index": {
+        "title": "Element Index",
+        "type": "integer"
+      },
+      "element_label": {
+        "title": "Element Label",
+        "type": "string"
+      }
+    },
+    "required": [
+      "element_index",
+      "element_label"
+    ],
+    "title": "get_multiframe_element_controlsArguments",
+    "type": "object"
+  },
+  "set_multiframe_element_controls": {
+    "additionalProperties": false,
+    "properties": {
+      "element_index": {
+        "title": "Element Index",
+        "type": "integer"
+      },
+      "element_label": {
+        "title": "Element Label",
+        "type": "string"
+      },
+      "controls_json": {
+        "title": "Controls Json",
+        "type": "string"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "element_index",
+      "element_label",
+      "controls_json",
+      "unit_token"
+    ],
+    "title": "set_multiframe_element_controlsArguments",
+    "type": "object"
+  },
+  "add_multiframe_element_loads": {
+    "additionalProperties": false,
+    "properties": {
+      "case_index": {
+        "title": "Case Index",
+        "type": "integer"
+      },
+      "case_name": {
+        "title": "Case Name",
+        "type": "string"
+      },
+      "loads_json": {
+        "title": "Loads Json",
+        "type": "string"
+      },
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "case_index",
+      "case_name",
+      "loads_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_element_loadsArguments",
+    "type": "object"
+  },
+  "set_multiframe_modal_controls": {
+    "additionalProperties": false,
+    "properties": {
+      "modes": {
+        "title": "Modes",
+        "type": "integer"
+      },
+      "solver": {
+        "title": "Solver",
+        "type": "string"
+      },
+      "scaling": {
+        "title": "Scaling",
+        "type": "string"
+      },
+      "mass_formulation": {
+        "title": "Mass Formulation",
+        "type": "string"
+      },
+      "max_iterations": {
+        "title": "Max Iterations",
+        "type": "integer"
+      },
+      "tolerance": {
+        "title": "Tolerance",
+        "type": "number"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "modes",
+      "solver",
+      "scaling",
+      "mass_formulation",
+      "max_iterations",
+      "tolerance",
+      "unit_token"
+    ],
+    "title": "set_multiframe_modal_controlsArguments",
+    "type": "object"
+  },
+  "set_multiframe_units": {
+    "additionalProperties": false,
+    "properties": {
+      "units_json": {
+        "title": "Units Json",
+        "type": "string"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      },
+      "unit_set": {
+        "default": "",
+        "title": "Unit Set",
+        "type": "string"
+      }
+    },
+    "required": [
+      "units_json",
+      "unit_token"
+    ],
+    "title": "set_multiframe_unitsArguments",
+    "type": "object"
+  },
+  "read_multiframe_auxiliary_objects": {
+    "additionalProperties": false,
+    "properties": {
+      "collection": {
+        "title": "Collection",
+        "type": "string"
+      },
+      "start": {
+        "default": 1,
+        "title": "Start",
+        "type": "integer"
+      },
+      "limit": {
+        "default": 100,
+        "title": "Limit",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "collection"
+    ],
+    "title": "read_multiframe_auxiliary_objectsArguments",
+    "type": "object"
+  },
+  "add_multiframe_node_masses": {
+    "additionalProperties": false,
+    "properties": {
+      "masses_json": {
+        "title": "Masses Json",
+        "type": "string"
+      },
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "masses_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_node_massesArguments",
+    "type": "object"
+  },
+  "add_multiframe_springs": {
+    "additionalProperties": false,
+    "properties": {
+      "springs_json": {
+        "title": "Springs Json",
+        "type": "string"
+      },
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "springs_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_springsArguments",
+    "type": "object"
+  },
+  "add_multiframe_node_link": {
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "nodes_json": {
+        "title": "Nodes Json",
+        "type": "string"
+      },
+      "master_index": {
+        "title": "Master Index",
+        "type": "integer"
+      },
+      "master_label": {
+        "title": "Master Label",
+        "type": "string"
+      },
+      "linked_dof_json": {
+        "title": "Linked Dof Json",
+        "type": "string"
+      },
+      "expected_count": {
+        "title": "Expected Count",
+        "type": "integer"
+      },
+      "unit_token": {
+        "title": "Unit Token",
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "nodes_json",
+      "master_index",
+      "master_label",
+      "linked_dof_json",
+      "expected_count",
+      "unit_token"
+    ],
+    "title": "add_multiframe_node_linkArguments",
+    "type": "object"
+  },
+  "export_modeler_file": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "format": {
+        "title": "Format",
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      },
+      "view": {
+        "default": "",
+        "title": "View",
+        "type": "string"
+      },
+      "precision": {
+        "default": "",
+        "title": "Precision",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path",
+      "format"
+    ],
+    "title": "export_modeler_fileArguments",
+    "type": "object"
+  },
+  "import_modeler_file": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "format": {
+        "title": "Format",
+        "type": "string"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      },
+      "acknowledge_unverified_semantics": {
+        "default": false,
+        "title": "Acknowledge Unverified Semantics",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path",
+      "format"
+    ],
+    "title": "import_modeler_fileArguments",
+    "type": "object"
+  },
+  "get_surface_linked_geometry": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index"
+    ],
+    "title": "get_surface_linked_geometryArguments",
+    "type": "object"
+  },
+  "get_surface_area_properties": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "area_type": {
+        "default": "msATTotal",
+        "title": "Area Type",
+        "type": "string"
+      },
+      "projection_type": {
+        "default": "msAPT3DTrueSurfaceArea",
+        "title": "Projection Type",
+        "type": "string"
+      }
+    },
+    "required": [
+      "index"
+    ],
+    "title": "get_surface_area_propertiesArguments",
+    "type": "object"
+  },
+  "create_linked_geometry_surface": {
+    "additionalProperties": false,
+    "properties": {
+      "basis_index": {
+        "title": "Basis Index",
+        "type": "integer"
+      },
+      "definition": {
+        "title": "Definition",
+        "type": "string"
+      },
+      "parameters_json": {
+        "title": "Parameters Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "basis_index",
+      "definition",
+      "parameters_json"
+    ],
+    "title": "create_linked_geometry_surfaceArguments",
+    "type": "object"
+  },
+  "list_meshes": {
+    "additionalProperties": false,
+    "properties": {},
+    "title": "list_meshesArguments",
+    "type": "object"
+  },
+  "get_mesh_statistics": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index"
+    ],
+    "title": "get_mesh_statisticsArguments",
+    "type": "object"
+  },
+  "get_mesh_enums": {
+    "additionalProperties": false,
+    "properties": {},
+    "title": "get_mesh_enumsArguments",
+    "type": "object"
+  },
+  "mesh_surface_edge_length": {
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "surface_index": {
+        "title": "Surface Index",
+        "type": "integer"
+      },
+      "minimum_edge_length": {
+        "title": "Minimum Edge Length",
+        "type": "number"
+      },
+      "maximum_edge_length": {
+        "title": "Maximum Edge Length",
+        "type": "number"
+      },
+      "mesh_type": {
+        "default": "msMTTriIso",
+        "title": "Mesh Type",
+        "type": "string"
+      },
+      "preserve_feature_lines": {
+        "default": true,
+        "title": "Preserve Feature Lines",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "name",
+      "surface_index",
+      "minimum_edge_length",
+      "maximum_edge_length"
+    ],
+    "title": "mesh_surface_edge_lengthArguments",
+    "type": "object"
+  },
+  "mesh_surface_parametric": {
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "surface_index": {
+        "title": "Surface Index",
+        "type": "integer"
+      },
+      "longitudinal_triangles": {
+        "title": "Longitudinal Triangles",
+        "type": "integer"
+      },
+      "transverse_triangles": {
+        "title": "Transverse Triangles",
+        "type": "integer"
+      },
+      "diagonal_layout": {
+        "title": "Diagonal Layout",
+        "type": "string"
+      },
+      "shortest_diagonal_override_percent": {
+        "default": 0,
+        "title": "Shortest Diagonal Override Percent",
+        "type": "number"
+      },
+      "mesh_type": {
+        "default": "msMTTriIso",
+        "title": "Mesh Type",
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "surface_index",
+      "longitudinal_triangles",
+      "transverse_triangles",
+      "diagonal_layout"
+    ],
+    "title": "mesh_surface_parametricArguments",
+    "type": "object"
+  },
+  "set_mesh_properties": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "properties_json": {
+        "title": "Properties Json",
+        "type": "string"
+      }
+    },
+    "required": [
+      "index",
+      "properties_json"
+    ],
+    "title": "set_mesh_propertiesArguments",
+    "type": "object"
+  },
+  "move_mesh": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "x": {
+        "title": "X",
+        "type": "number"
+      },
+      "y": {
+        "title": "Y",
+        "type": "number"
+      },
+      "z": {
+        "title": "Z",
+        "type": "number"
+      },
+      "duplicate": {
+        "default": false,
+        "title": "Duplicate",
+        "type": "boolean"
+      },
+      "times": {
+        "default": 1,
+        "title": "Times",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index",
+      "x",
+      "y",
+      "z"
+    ],
+    "title": "move_meshArguments",
+    "type": "object"
+  },
+  "rotate_mesh": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "roll": {
+        "title": "Roll",
+        "type": "number"
+      },
+      "pitch": {
+        "title": "Pitch",
+        "type": "number"
+      },
+      "yaw": {
+        "title": "Yaw",
+        "type": "number"
+      },
+      "centre_x": {
+        "default": 0,
+        "title": "Centre X",
+        "type": "number"
+      },
+      "centre_y": {
+        "default": 0,
+        "title": "Centre Y",
+        "type": "number"
+      },
+      "centre_z": {
+        "default": 0,
+        "title": "Centre Z",
+        "type": "number"
+      },
+      "duplicate": {
+        "default": false,
+        "title": "Duplicate",
+        "type": "boolean"
+      },
+      "times": {
+        "default": 1,
+        "title": "Times",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index",
+      "roll",
+      "pitch",
+      "yaw"
+    ],
+    "title": "rotate_meshArguments",
+    "type": "object"
+  },
+  "scale_mesh": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "scale_x": {
+        "title": "Scale X",
+        "type": "number"
+      },
+      "scale_y": {
+        "title": "Scale Y",
+        "type": "number"
+      },
+      "scale_z": {
+        "title": "Scale Z",
+        "type": "number"
+      },
+      "centre_x": {
+        "default": 0,
+        "title": "Centre X",
+        "type": "number"
+      },
+      "centre_y": {
+        "default": 0,
+        "title": "Centre Y",
+        "type": "number"
+      },
+      "centre_z": {
+        "default": 0,
+        "title": "Centre Z",
+        "type": "number"
+      }
+    },
+    "required": [
+      "index",
+      "scale_x",
+      "scale_y",
+      "scale_z"
+    ],
+    "title": "scale_meshArguments",
+    "type": "object"
+  },
+  "flip_mesh": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "direction": {
+        "title": "Direction",
+        "type": "string"
+      },
+      "plane_location": {
+        "default": 0,
+        "title": "Plane Location",
+        "type": "number"
+      },
+      "duplicate": {
+        "default": false,
+        "title": "Duplicate",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "index",
+      "direction"
+    ],
+    "title": "flip_meshArguments",
+    "type": "object"
+  },
+  "invert_mesh_normals": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "index"
+    ],
+    "title": "invert_mesh_normalsArguments",
+    "type": "object"
+  },
+  "repair_mesh": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "repair_method": {
+        "title": "Repair Method",
+        "type": "string"
+      }
+    },
+    "required": [
+      "index",
+      "repair_method"
+    ],
+    "title": "repair_meshArguments",
+    "type": "object"
+  },
+  "clean_mesh": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "merge_node_tolerance": {
+        "default": 0.00001,
+        "title": "Merge Node Tolerance",
+        "type": "number"
+      },
+      "skinny_triangle_tolerance": {
+        "default": 0.00001,
+        "title": "Skinny Triangle Tolerance",
+        "type": "number"
+      },
+      "compact_nodes": {
+        "default": true,
+        "title": "Compact Nodes",
+        "type": "boolean"
+      },
+      "remove_degenerate_triangles": {
+        "default": true,
+        "title": "Remove Degenerate Triangles",
+        "type": "boolean"
+      },
+      "remove_duplicate_triangles": {
+        "default": true,
+        "title": "Remove Duplicate Triangles",
+        "type": "boolean"
+      },
+      "remove_skinny_triangles": {
+        "default": true,
+        "title": "Remove Skinny Triangles",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "index"
+    ],
+    "title": "clean_meshArguments",
+    "type": "object"
+  },
+  "combine_meshes": {
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "index_a": {
+        "title": "Index A",
+        "type": "integer"
+      },
+      "index_b": {
+        "title": "Index B",
+        "type": "integer"
+      },
+      "operation": {
+        "enum": [
+          "join",
+          "union",
+          "intersection"
+        ],
+        "title": "Operation",
+        "type": "string"
+      },
+      "delete_originals": {
+        "default": false,
+        "title": "Delete Originals",
+        "type": "boolean"
+      },
+      "clean_result": {
+        "default": false,
+        "title": "Clean Result",
+        "type": "boolean"
+      },
+      "merge_node_tolerance": {
+        "default": 0.00001,
+        "title": "Merge Node Tolerance",
+        "type": "number"
+      },
+      "skinny_triangle_tolerance": {
+        "default": 0.00001,
+        "title": "Skinny Triangle Tolerance",
+        "type": "number"
+      }
+    },
+    "required": [
+      "name",
+      "index_a",
+      "index_b",
+      "operation"
+    ],
+    "title": "combine_meshesArguments",
+    "type": "object"
+  },
+  "delete_mesh": {
+    "additionalProperties": false,
+    "properties": {
+      "index": {
+        "title": "Index",
+        "type": "integer"
+      },
+      "confirm": {
+        "default": false,
+        "title": "Confirm",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "index"
+    ],
+    "title": "delete_meshArguments",
+    "type": "object"
+  },
+  "set_resistance_measurements": {
+    "additionalProperties": false,
+    "properties": {
+      "measurements_json": {
+        "title": "Measurements Json",
+        "type": "string"
+      },
+      "chine_type": {
+        "default": "",
+        "title": "Chine Type",
+        "type": "string"
+      }
+    },
+    "required": [
+      "measurements_json"
+    ],
+    "title": "set_resistance_measurementsArguments",
+    "type": "object"
+  },
+  "set_resistance_form_factor": {
+    "additionalProperties": false,
+    "properties": {
+      "mode": {
+        "title": "Mode",
+        "type": "string"
+      },
+      "one_plus_k": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "One Plus K"
+      }
+    },
+    "required": [
+      "mode"
+    ],
+    "title": "set_resistance_form_factorArguments",
+    "type": "object"
+  },
+  "open_resistance_measurements": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "open_resistance_measurementsArguments",
+    "type": "object"
+  },
+  "save_resistance_measurements": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "save_resistance_measurementsArguments",
+    "type": "object"
+  },
+  "import_resistance_free_surface": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "confirm_replace": {
+        "default": false,
+        "title": "Confirm Replace",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "import_resistance_free_surfaceArguments",
+    "type": "object"
+  },
+  "export_resistance_free_surface": {
+    "additionalProperties": false,
+    "properties": {
+      "path": {
+        "title": "Path",
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "title": "Overwrite",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "title": "export_resistance_free_surfaceArguments",
+    "type": "object"
+  },
   "add_downflooding_points": {
+    "additionalProperties": false,
     "properties": {
       "backup_path": {
         "default": "",
@@ -28,6 +1547,7 @@
     "type": "object"
   },
   "add_marker": {
+    "additionalProperties": false,
     "properties": {
       "height": {
         "title": "Height",
@@ -61,6 +1581,7 @@
     "type": "object"
   },
   "add_modeler_grid_line": {
+    "additionalProperties": false,
     "properties": {
       "angle": {
         "default": 0.0,
@@ -89,6 +1610,7 @@
     "type": "object"
   },
   "add_multiframe_elements": {
+    "additionalProperties": false,
     "properties": {
       "elements_json": {
         "title": "Elements Json",
@@ -112,6 +1634,7 @@
     "type": "object"
   },
   "add_multiframe_loadcase": {
+    "additionalProperties": false,
     "properties": {
       "expected_count": {
         "title": "Expected Count",
@@ -140,6 +1663,7 @@
     "type": "object"
   },
   "add_multiframe_nodes": {
+    "additionalProperties": false,
     "properties": {
       "expected_count": {
         "title": "Expected Count",
@@ -163,6 +1687,7 @@
     "type": "object"
   },
   "add_multiframe_restraints": {
+    "additionalProperties": false,
     "properties": {
       "expected_count": {
         "title": "Expected Count",
@@ -186,6 +1711,7 @@
     "type": "object"
   },
   "add_parametric_surface": {
+    "additionalProperties": false,
     "properties": {
       "parameters_json": {
         "title": "Parameters Json",
@@ -204,6 +1730,7 @@
     "type": "object"
   },
   "add_quadrilateral_surface": {
+    "additionalProperties": false,
     "properties": {
       "corners_json": {
         "title": "Corners Json",
@@ -227,6 +1754,7 @@
     "type": "object"
   },
   "bond_surfaces": {
+    "additionalProperties": false,
     "properties": {
       "continuity": {
         "default": "msBondC0",
@@ -265,6 +1793,7 @@
     "type": "object"
   },
   "calculate_free_surface": {
+    "additionalProperties": false,
     "properties": {
       "extent_aft": {
         "default": 3.0,
@@ -313,6 +1842,7 @@
     "type": "object"
   },
   "calculate_hydrostatics": {
+    "additionalProperties": false,
     "properties": {
       "density": {
         "default": 1025.0,
@@ -329,6 +1859,7 @@
     "type": "object"
   },
   "capture_modeler_view": {
+    "additionalProperties": false,
     "properties": {
       "expected_window_title": {
         "title": "Expected Window Title",
@@ -347,6 +1878,7 @@
     "type": "object"
   },
   "com_constants": {
+    "additionalProperties": false,
     "properties": {
       "filter": {
         "default": "",
@@ -363,6 +1895,7 @@
     "type": "object"
   },
   "com_describe": {
+    "additionalProperties": false,
     "properties": {
       "module": {
         "default": "modeler",
@@ -384,6 +1917,7 @@
     "type": "object"
   },
   "com_typeinfo": {
+    "additionalProperties": false,
     "properties": {
       "inherited_depth": {
         "default": 2,
@@ -405,6 +1939,7 @@
     "type": "object"
   },
   "configure_modeler_rendering": {
+    "additionalProperties": false,
     "properties": {
       "expected_window_title": {
         "title": "Expected Window Title",
@@ -433,6 +1968,7 @@
     "type": "object"
   },
   "configure_motions_analysis": {
+    "additionalProperties": false,
     "properties": {
       "analysis_type": {
         "title": "Analysis Type",
@@ -516,6 +2052,7 @@
     "type": "object"
   },
   "configure_resistance_analysis": {
+    "additionalProperties": false,
     "properties": {
       "high_knots": {
         "title": "High Knots",
@@ -556,6 +2093,7 @@
     "type": "object"
   },
   "connect_maxsurf": {
+    "additionalProperties": false,
     "properties": {
       "module": {
         "default": "modeler",
@@ -577,6 +2115,7 @@
     "type": "object"
   },
   "create_library_surface": {
+    "additionalProperties": false,
     "properties": {
       "name": {
         "anyOf": [
@@ -602,6 +2141,7 @@
     "type": "object"
   },
   "define_damage_cases": {
+    "additionalProperties": false,
     "properties": {
       "cases_json": {
         "title": "Cases Json",
@@ -615,6 +2155,7 @@
     "type": "object"
   },
   "define_loadcase": {
+    "additionalProperties": false,
     "properties": {
       "backup_path": {
         "default": "",
@@ -653,6 +2194,7 @@
     "type": "object"
   },
   "define_subdivision": {
+    "additionalProperties": false,
     "properties": {
       "backup_path": {
         "default": "",
@@ -681,6 +2223,7 @@
     "type": "object"
   },
   "delete_surface": {
+    "additionalProperties": false,
     "properties": {
       "expected_name": {
         "title": "Expected Name",
@@ -699,6 +2242,7 @@
     "type": "object"
   },
   "evaluate_stability_criteria": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -772,6 +2316,7 @@
     "type": "object"
   },
   "export_motions_table": {
+    "additionalProperties": false,
     "properties": {
       "overwrite": {
         "default": false,
@@ -795,6 +2340,7 @@
     "type": "object"
   },
   "export_multiframe_results": {
+    "additionalProperties": false,
     "properties": {
       "case_index": {
         "default": 1,
@@ -828,6 +2374,7 @@
     "type": "object"
   },
   "export_resistance_results": {
+    "additionalProperties": false,
     "properties": {
       "max_points": {
         "default": 500,
@@ -851,6 +2398,7 @@
     "type": "object"
   },
   "export_stability_image": {
+    "additionalProperties": false,
     "properties": {
       "height": {
         "default": 800,
@@ -879,6 +2427,7 @@
     "type": "object"
   },
   "flip_surface": {
+    "additionalProperties": false,
     "properties": {
       "direction": {
         "title": "Direction",
@@ -907,6 +2456,7 @@
     "type": "object"
   },
   "get_control_net": {
+    "additionalProperties": false,
     "properties": {
       "index": {
         "default": 1,
@@ -918,11 +2468,13 @@
     "type": "object"
   },
   "get_frame_of_reference": {
+    "additionalProperties": false,
     "properties": {},
     "title": "get_frame_of_referenceArguments",
     "type": "object"
   },
   "get_motions_results": {
+    "additionalProperties": false,
     "properties": {
       "max_combinations": {
         "default": 200,
@@ -934,11 +2486,13 @@
     "type": "object"
   },
   "get_motions_status": {
+    "additionalProperties": false,
     "properties": {},
     "title": "get_motions_statusArguments",
     "type": "object"
   },
   "get_multiframe_results": {
+    "additionalProperties": false,
     "properties": {
       "case_index": {
         "default": 1,
@@ -965,11 +2519,13 @@
     "type": "object"
   },
   "get_multiframe_status": {
+    "additionalProperties": false,
     "properties": {},
     "title": "get_multiframe_statusArguments",
     "type": "object"
   },
   "get_resistance_results": {
+    "additionalProperties": false,
     "properties": {
       "max_points": {
         "default": 500,
@@ -981,11 +2537,13 @@
     "type": "object"
   },
   "get_resistance_status": {
+    "additionalProperties": false,
     "properties": {},
     "title": "get_resistance_statusArguments",
     "type": "object"
   },
   "get_results_table": {
+    "additionalProperties": false,
     "properties": {
       "module": {
         "title": "Module",
@@ -1004,11 +2562,13 @@
     "type": "object"
   },
   "get_stability_loadcase_table_headers": {
+    "additionalProperties": false,
     "properties": {},
     "title": "get_stability_loadcase_table_headersArguments",
     "type": "object"
   },
   "get_surface_properties": {
+    "additionalProperties": false,
     "properties": {
       "index": {
         "default": 1,
@@ -1020,11 +2580,13 @@
     "type": "object"
   },
   "inspect_modeler_display": {
+    "additionalProperties": false,
     "properties": {},
     "title": "inspect_modeler_displayArguments",
     "type": "object"
   },
   "inspect_surface_topology": {
+    "additionalProperties": false,
     "properties": {
       "include_bounds": {
         "default": true,
@@ -1036,6 +2598,7 @@
     "type": "object"
   },
   "invert_surface_normal": {
+    "additionalProperties": false,
     "properties": {
       "index": {
         "title": "Index",
@@ -1049,11 +2612,13 @@
     "type": "object"
   },
   "list_criteria_libraries": {
+    "additionalProperties": false,
     "properties": {},
     "title": "list_criteria_librariesArguments",
     "type": "object"
   },
   "list_markers": {
+    "additionalProperties": false,
     "properties": {
       "include_surface_error": {
         "default": false,
@@ -1080,6 +2645,7 @@
     "type": "object"
   },
   "list_modeler_grid": {
+    "additionalProperties": false,
     "properties": {
       "grid_type": {
         "default": "all",
@@ -1101,6 +2667,7 @@
     "type": "object"
   },
   "list_multiframe_sections": {
+    "additionalProperties": false,
     "properties": {
       "group": {
         "default": "",
@@ -1122,21 +2689,25 @@
     "type": "object"
   },
   "list_progids": {
+    "additionalProperties": false,
     "properties": {},
     "title": "list_progidsArguments",
     "type": "object"
   },
   "list_surface_library": {
+    "additionalProperties": false,
     "properties": {},
     "title": "list_surface_libraryArguments",
     "type": "object"
   },
   "list_surfaces": {
+    "additionalProperties": false,
     "properties": {},
     "title": "list_surfacesArguments",
     "type": "object"
   },
   "load_motions_data": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -1155,6 +2726,7 @@
     "type": "object"
   },
   "marker_fit_report": {
+    "additionalProperties": false,
     "properties": {
       "max_items": {
         "default": 5000,
@@ -1171,6 +2743,7 @@
     "type": "object"
   },
   "move_surface": {
+    "additionalProperties": false,
     "properties": {
       "duplicate": {
         "default": false,
@@ -1209,6 +2782,7 @@
     "type": "object"
   },
   "new_multiframe_model": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -1220,6 +2794,7 @@
     "type": "object"
   },
   "open_design": {
+    "additionalProperties": false,
     "properties": {
       "confirm_discard": {
         "default": false,
@@ -1248,6 +2823,7 @@
     "type": "object"
   },
   "open_motions_design": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -1266,6 +2842,7 @@
     "type": "object"
   },
   "open_multiframe_model": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -1284,6 +2861,7 @@
     "type": "object"
   },
   "read_multiframe_model": {
+    "additionalProperties": false,
     "properties": {
       "limit": {
         "default": 100,
@@ -1300,6 +2878,7 @@
     "type": "object"
   },
   "refresh_modeler_view": {
+    "additionalProperties": false,
     "properties": {
       "reset_zoom": {
         "default": true,
@@ -1311,11 +2890,13 @@
     "type": "object"
   },
   "refresh_multiframe_view": {
+    "additionalProperties": false,
     "properties": {},
     "title": "refresh_multiframe_viewArguments",
     "type": "object"
   },
   "replace_modeler_grid": {
+    "additionalProperties": false,
     "properties": {
       "confirm_delete_all": {
         "default": false,
@@ -1344,6 +2925,7 @@
     "type": "object"
   },
   "rescale_surface": {
+    "additionalProperties": false,
     "properties": {
       "centre_x": {
         "default": 0.0,
@@ -1387,6 +2969,7 @@
     "type": "object"
   },
   "reset_connection": {
+    "additionalProperties": false,
     "properties": {
       "module": {
         "default": "",
@@ -1398,6 +2981,7 @@
     "type": "object"
   },
   "rotate_surface": {
+    "additionalProperties": false,
     "properties": {
       "duplicate": {
         "default": false,
@@ -1451,12 +3035,19 @@
     "type": "object"
   },
   "run_motions_analysis": {
+    "additionalProperties": false,
     "properties": {},
     "title": "run_motions_analysisArguments",
     "type": "object"
   },
   "run_multiframe_analysis": {
+    "additionalProperties": false,
     "properties": {
+      "mass_formulation": {
+        "default": "distributed",
+        "title": "Mass Formulation",
+        "type": "string"
+      },
       "method": {
         "default": "linear",
         "title": "Method",
@@ -1479,6 +3070,7 @@
     "type": "object"
   },
   "run_resistance_analysis": {
+    "additionalProperties": false,
     "properties": {
       "air_density_kg_m3": {
         "default": 0.0,
@@ -1552,6 +3144,7 @@
     "type": "object"
   },
   "run_stability_equilibrium": {
+    "additionalProperties": false,
     "properties": {
       "lcg": {
         "anyOf": [
@@ -1606,6 +3199,7 @@
     "type": "object"
   },
   "run_stability_gz": {
+    "additionalProperties": false,
     "properties": {
       "damage_case": {
         "default": "",
@@ -1669,6 +3263,7 @@
     "type": "object"
   },
   "save_design": {
+    "additionalProperties": false,
     "properties": {
       "overwrite": {
         "default": false,
@@ -1685,6 +3280,7 @@
     "type": "object"
   },
   "save_motions_state": {
+    "additionalProperties": false,
     "properties": {
       "path": {
         "title": "Path",
@@ -1698,6 +3294,7 @@
     "type": "object"
   },
   "save_multiframe_model": {
+    "additionalProperties": false,
     "properties": {
       "path": {
         "title": "Path",
@@ -1711,6 +3308,7 @@
     "type": "object"
   },
   "save_stability_rooms": {
+    "additionalProperties": false,
     "properties": {
       "overwrite": {
         "default": false,
@@ -1729,11 +3327,13 @@
     "type": "object"
   },
   "session_status": {
+    "additionalProperties": false,
     "properties": {},
     "title": "session_statusArguments",
     "type": "object"
   },
   "set_assembly_visibility": {
+    "additionalProperties": false,
     "properties": {
       "assembly_name": {
         "title": "Assembly Name",
@@ -1752,6 +3352,7 @@
     "type": "object"
   },
   "set_control_point": {
+    "additionalProperties": false,
     "properties": {
       "column": {
         "title": "Column",
@@ -1790,6 +3391,7 @@
     "type": "object"
   },
   "set_control_points": {
+    "additionalProperties": false,
     "properties": {
       "points_json": {
         "title": "Points Json",
@@ -1808,6 +3410,7 @@
     "type": "object"
   },
   "set_frame_of_reference": {
+    "additionalProperties": false,
     "properties": {
       "aft_perp": {
         "anyOf": [
@@ -1930,6 +3533,7 @@
     "type": "object"
   },
   "set_heel_range": {
+    "additionalProperties": false,
     "properties": {
       "first_end": {
         "title": "First End",
@@ -1978,6 +3582,7 @@
     "type": "object"
   },
   "set_marker": {
+    "additionalProperties": false,
     "properties": {
       "expected_name": {
         "title": "Expected Name",
@@ -2001,6 +3606,7 @@
     "type": "object"
   },
   "set_modeler_grid_line": {
+    "additionalProperties": false,
     "properties": {
       "angle": {
         "default": 0.0,
@@ -2039,6 +3645,7 @@
     "type": "object"
   },
   "set_section_split": {
+    "additionalProperties": false,
     "properties": {
       "expected_before": {
         "title": "Expected Before",
@@ -2057,6 +3664,7 @@
     "type": "object"
   },
   "set_surface_properties": {
+    "additionalProperties": false,
     "properties": {
       "index": {
         "title": "Index",
@@ -2075,6 +3683,7 @@
     "type": "object"
   },
   "surface_summary": {
+    "additionalProperties": false,
     "properties": {
       "index": {
         "default": 1,
@@ -2086,6 +3695,7 @@
     "type": "object"
   },
   "transfer_modeler_to_motions": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -2102,6 +3712,7 @@
     "type": "object"
   },
   "transfer_modeler_to_resistance": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -2118,6 +3729,7 @@
     "type": "object"
   },
   "transfer_modeler_to_stability": {
+    "additionalProperties": false,
     "properties": {
       "confirm_replace": {
         "default": false,
@@ -2134,6 +3746,7 @@
     "type": "object"
   },
   "unbond_surface": {
+    "additionalProperties": false,
     "properties": {
       "edge": {
         "title": "Edge",

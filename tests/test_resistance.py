@@ -66,6 +66,16 @@ class _Results:
 
 
 class ResistanceTests(unittest.TestCase):
+    def test_result_velocity_mismatch_refuses_derived_power(self):
+        from maxsurf_mcp.errors import MaxsurfAnalysisError
+        app = self.app(initialized=True, loaded=True)
+        app.Design.Methods.selected.add(5)
+        app.Design.ResistanceResults.Velocity = lambda index: 6.0 + index
+        with patch.object(resistance.comconstants, "discover",
+                          side_effect=self.discovery):
+            with self.assertRaises(MaxsurfAnalysisError):
+                resistance._read_results(app, app.Design, 500)
+
     def app(self, *, initialized=False, loaded=False):
         methods = _Methods()
         velocities = SimpleNamespace(Low=0.0, High=10.28888888888889)

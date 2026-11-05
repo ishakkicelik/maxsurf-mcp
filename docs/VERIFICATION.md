@@ -1,5 +1,108 @@
 # Verification evidence: 0.2.0-rc.5
 
+## Current source acceptance: 2026-10-15
+
+The expanded server has 144 default tools and seven opt-in diagnostics. These
+source checks are separate from the historical 2025 numerical results below.
+Fresh coverage is generated against the installed type libraries:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/check_native_coverage.py `
+  --output runtime/native-coverage-final-20261015.json
+```
+
+The observed inventory contains 7,084 unique member contracts: 4,923
+metadata-admitted routes and 2,161 explicit boundaries, with no unknown,
+unresolved or unreadable slots. These are metadata admission counts, not
+individually executed or engineering-accepted operations.
+
+Real MCP tests on Modeler 26.00.00.433 exercised all four tube generators with
+nonempty control-net readbacks, connector bonding/unbonding, hydrostatic
+precision changes and calculation, and original-preference restoration.
+The geometry/file smoke additionally exercised control-point edits, surface
+and mesh movement, meshing, IGES/3DM/OBJ exports, OBJ import and native save/reopen.
+The original saved 52-surface test fixture was restored with matching full
+surface control nets, mesh summaries, markers, construction grids and frame.
+These checks establish software behavior on this build, not hull quality or
+independently verified numerical accuracy.
+
+The diagnostic MCP also enumerated all 52 native surfaces, checked independent
+clone/reset/skip cursors, released handles and rejected a released token. All
+151 enabled tools rejected an unknown raw input field. A real native defect was
+reproduced: multi-item `IEnumVARIANT.Next(n)` skipped earlier objects and emitted
+null slots. The adapter's bounded batches now use repeated `Next(1)` calls;
+the same live collection check passed after that change.
+
+### Preserved native smoke
+
+Open a saved disposable test vessel in Modeler, with all intended changes already
+saved. Use that exact `.msd` path. The example below assumes
+`C:\MaxsurfDesigns\qa-vessel.msd` has been prepared; the smoke does not create or
+silently save the original fixture.
+
+```powershell
+.\.venv\Scripts\python.exe scripts/smoke_native_modeler.py `
+  --python .\.venv\Scripts\python.exe --entry server.py `
+  --workspace C:\MaxsurfDesigns\qa-runs `
+  --disposable-fixture C:\MaxsurfDesigns\qa-vessel.msd `
+  --confirm-saved-disposable-fixture
+```
+
+The confirmation attests that the disk file contains the complete current state;
+Modeler has no proven dirty-state getter here. Mutations target a separate copy.
+`evidence.json` records initial/final state and cleanup status. `restored` means
+the original fixture was reopened and compared. `manual_recovery_required`
+is a failure: retain the directory and follow its recorded recovery instructions.
+Only remove generated native files/cache directories after restoration is
+confirmed; retain evidence and the original vessel. The application remains open.
+
+### Installed wrappers and relocated packages
+
+`tests.native_wrapper_contract` resolves the registered Modeler type library.
+For a selected installation, set `MAXSURF_MCP_MODELER_TYPELIB` to its executable
+or typelib path before running the explicit suite. Missing native resources
+fail this integration check; it remains outside offline discovery.
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.native_wrapper_contract -v
+.\.venv\Scripts\python.exe scripts/build_release.py --output-dir dist/acceptance
+.\.venv\Scripts\python.exe scripts/verify_release_artifacts.py `
+  --artifact-dir dist/acceptance --python .\.venv\Scripts\python.exe
+```
+
+Use a new output directory for each build. The artifact verifier checks archive
+hashes, integrity and source identity, then launches extracted MCPB and Codex
+servers from relocated paths with spaces and an unrelated working directory.
+CI runs it before artifact upload. These protocol checks do not claim a
+Claude/Codex GUI install/uninstall lifecycle.
+
+## Expanded source checks: 2026-10-11
+
+The source expansion is checked using the exact `requirements.lock` on Windows
+x64 CPython 3.12. Raw JSON-schema validation rejects Boolean numeric indices and
+unknown options before SDK coercion or native dispatch. Real stdio compares
+every default input schema with the checked snapshot.
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -t . -q
+.\.venv\Scripts\python.exe .\scripts\validate_release.py
+.\.venv\Scripts\python.exe .\scripts\smoke_stdio.py `
+  --python .\.venv\Scripts\python.exe --entry .\server.py
+```
+
+Installed-native checks are explicit, separate from offline CI:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.native_wrapper_contract -v
+.\.venv\Scripts\python.exe .\scripts\check_native_coverage.py `
+  --output .\runtime\native-coverage.json
+```
+
+The coverage file must not already exist. It records every unique member's
+route or boundary without treating metadata as engineering acceptance.
+[Native automation](NATIVE_AUTOMATION.md) records the actual native MCP evidence,
+helper initialization, diagnostic effect modes and unsupported workflows.
+
 Native evidence recorded 2026-09-08 UTC; software and MIT publication checks updated
 2026-09-09 UTC. Software tests are not engineering certification.
 

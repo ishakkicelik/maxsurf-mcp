@@ -57,13 +57,8 @@ LOADCASE_TYPE_NAME = "hmLTLoadcase"
 #: carries the criterion names that ICriterion itself has no getter for.
 STABILITY_XMLGRID_PROGID = "BentleyStability.XMLGrid"
 
-#: Maxsurf ships one .hcr criteria file per authority under this directory.
-#: Overridable because the install path carries the version.
+#: Override criteria discovery from the registered Stability typelib path.
 CRITERIA_LIBRARY_ENV = "MAXSURF_MCP_CRITERIA_DIR"
-DEFAULT_CRITERIA_LIBRARY = (
-    r"C:\Program Files\Bentley\Offshore\Maxsurf 2025\bin\win64"
-    r"\StabilitySpecificCriteria"
-)
 
 #: Large-angle stability result getters proven on IResult.
 GZ_FIELDS: tuple[str, ...] = (
@@ -246,13 +241,17 @@ def define_subdivision(rooms_json: str, clear_first: bool = False,
     for row in validated:
         if row.get("fluid"):
             row["fluid_value"] = _constant(app, val.name(row["fluid"], "fluid"))
+        row["type_value"] = _constant(app, {
+            "tank": "hmCTTank", "compartment": "hmCTCompartment",
+            "non_buoyant": "hmCTNBV",
+        }[row["kind"]])
     tanks, comps = design.Tanks, design.Compartments
     before = {"tanks": int(tanks.Count), "compartments": int(comps.Count)}
     existing = _room_names(design)
     if not clear_first and seen & existing:
         raise MaxsurfValidationError("room names already exist", names=sorted(seen & existing))
     backup = _before_replace(design, clear_first, confirm_replace, backup_path)
-    created = []
+    created, room_readback = [], []
     try:
         if clear_first:
             tanks.DeleteAll()
@@ -269,16 +268,24 @@ def define_subdivision(rooms_json: str, clear_first: bool = False,
             else:
                 getattr(comps, "AddNBV" if row["kind"]=="non_buoyant" else "Add")(
                     *args, row["permeability"])
+                item = comps.ItemByName(row["name"])
+            from .stability_controls import _verify_room
+            room_readback.append(_verify_room(item, row))
             created.append(row["name"])
         missing = seen - _room_names(design)
         if missing:
             raise MaxsurfCOMError("room readback missing", names=sorted(missing))
+        expected_tanks = sum(row["kind"] == "tank" for row in validated)
+        expected_comps = len(validated) - expected_tanks
+        if int(tanks.Count) != (0 if clear_first else before["tanks"]) + expected_tanks or \
+                int(comps.Count) != (0 if clear_first else before["compartments"]) + expected_comps:
+            raise MaxsurfCOMError("room count mismatch")
     except Exception as exc:
         raise MaxsurfCOMError("subdivision update failed", cause=exc,
                               created=created, backup=backup, partial_state_possible=True) from exc
     return com.to_json({"created": created, "count_before": before,
                         "count_after": {"tanks": int(tanks.Count), "compartments": int(comps.Count)},
-                        "backup": backup, "verified": True})
+                        "backup": backup, "rooms_native": room_readback, "verified": True})
 
 
 @guarded(classification=Classification.WRITE_STATE, module="stability", channel=Channel.MCP_COM)
@@ -295,7 +302,20 @@ def set_heel_range(start: float, first_end: float, first_step: float,
 
 
 def _criteria_library_dir() -> str:
-    return os.environ.get(CRITERIA_LIBRARY_ENV, DEFAULT_CRITERIA_LIBRARY)
+    override = os.environ.get(CRITERIA_LIBRARY_ENV)
+    if override is not None:
+        return val.name(override, CRITERIA_LIBRARY_ENV)
+    from pathlib import Path
+    import pythoncom
+    import pywintypes
+    try:
+        # Resolve the registered library, never an arbitrary newest install.
+        path = pythoncom.QueryPathOfRegTypeLib(
+            pywintypes.IID("{A55FAB0F-71A2-4141-BFFE-487A7F99E1D8}"), 1, 1, 0)
+        return str(Path(path.rstrip("\x00")).parent / "StabilitySpecificCriteria")
+    except Exception as exc:
+        raise MaxsurfCOMError("registered Stability criteria installation unavailable",
+                              cause=exc) from exc
 
 
 def _available_standards(library_dir: str) -> list[str]:
@@ -415,12 +435,18 @@ def define_loadcase(name: str, tank_fills_json: str, mass_items_json: str,
             lc.AddMassItem(*row)
         if int(lc.MassItemCount)!=len(mass_rows):
             raise MaxsurfCOMError("mass item count mismatch")
+        from .stability_controls import _verify
+        members = ("Name", "Quantity", "Mass", "LCG", "TCG", "VCG",
+                   "AftExtent", "FwdExtent", "FSM")
+        mass_readback = [_verify(lc.MassItem(i), dict(zip(members, row)))
+                         for i, row in enumerate(mass_rows, 1)]
         total=val.number(lc.Mass,"readback_mass",positive=True)
     except Exception as exc:
         raise MaxsurfCOMError("loadcase update failed",cause=exc,backup=backup,
                               partial_state_possible=True) from exc
     return com.to_json({"loadcase":case_name,"mass_kg":total,"tank_fills":fills,
-                        "mass_item_count":len(mass_rows),"backup":backup})
+                        "mass_item_count":len(mass_rows),"backup":backup,
+                        "mass_items_native":mass_readback,"verified":True})
 
 
 @guarded(classification=Classification.WRITE_STATE, module="stability", channel=Channel.MCP_COM)
@@ -483,12 +509,21 @@ def add_downflooding_points(points_json: str, clear_first: bool = False,
     app=com.connect("stability")
     design=app.Design
     values={p[-1]:_constant(app,KEYPOINT_KINDS[p[-1]]) for p in planned}
+    from .stability_controls import _verify
+    existing = {str(design.KeyPoints.Item(i).Name)
+                for i in range(1, int(design.KeyPoints.Count) + 1)}
+    if seen & existing and not clear_first:
+        raise MaxsurfSafetyError("keypoint names already exist", names=sorted(seen & existing))
+    if any(p[-1] == "conditional" for p in planned):
+        raise MaxsurfValidationError("use define_conditional_keypoints with explicit linked room and use policies")
     backup=_before_replace(design,clear_first,confirm_replace,backup_path, scope="keypoints")
     before=int(design.KeyPoints.Count)
     try:
         if clear_first: design.KeyPoints.DeleteAll()
-        for name,x,y,z,kind in planned:
+        for index,(name,x,y,z,kind) in enumerate(planned, before + 1):
             design.KeyPoints.Add(name,x,y,z,values[kind])
+            _verify(design.KeyPoints.Item(index), dict(
+                Name=name, Position=x, Offset=y, Height=z, Type=values[kind]))
         if int(design.KeyPoints.Count)!=(0 if clear_first else before)+len(planned):
             raise MaxsurfCOMError("keypoint count mismatch")
     except Exception as exc:
@@ -679,8 +714,9 @@ def save_stability_rooms(path: str, overwrite: bool = False) -> str:
     """Save native Stability tank and compartment definitions to a .htk file.
 
     The .htk is companion data, not a replacement for the hull .msd.
-    File existence and digest are verified; reopening is a separate acceptance
-    test, never performed implicitly because it would replace the live model.
+    Nonempty output and before/after write evidence are verified at the final
+    native save path. Reopening is a separate acceptance test, never performed
+    implicitly because it would replace the live model.
     """
     target = workspace.resolve_target(path, purpose="save_stability_rooms",
                                       overwrite=overwrite, allowed_suffixes=(".htk",))
@@ -689,13 +725,27 @@ def save_stability_rooms(path: str, overwrite: bool = False) -> str:
     counts = {name: int(getattr(design, name).Count)
               for name in ("Tanks", "Compartments")}
     target.parent.mkdir(parents=True, exist_ok=True)
+    before = None
+    if target.exists():
+        previous = target.stat()
+        before = (previous.st_mtime_ns, previous.st_ctime_ns, previous.st_size,
+                  _digest(target)["sha256"])
     try:
-        design.SaveAsRooms(str(target), bool(overwrite))
-        if not target.is_file() or target.stat().st_size == 0:
+        # Keep SaveAsRooms on the final path: a staged SaveAs can leave native
+        # file identity pointing at a file that has since been moved.
+        result = design.SaveAsRooms(str(target), bool(overwrite))
+        if result is False or not target.is_file() or target.stat().st_size == 0:
             raise MaxsurfCOMError("Stability did not write a nonempty .htk", path=str(target))
+        evidence = _digest(target)
+        current = target.stat()
+        after = (current.st_mtime_ns, current.st_ctime_ns, current.st_size,
+                 evidence["sha256"])
+        if before == after:
+            raise MaxsurfCOMError("SaveAsRooms left the existing output unchanged; this call has no file-write evidence",
+                                  path=str(target))
     finally:
         com.session_for("stability").refresh_design_identity()
-    return com.to_json({"module": "stability", "path": str(target), **_digest(target),
+    return com.to_json({"module": "stability", "path": str(target), **evidence,
                         "native_member": "Design.SaveAsRooms", "counts_at_save": counts,
                         "file_verified": True, "reopen_verified": False,
                         "warning": "Rooms only: retain hull .msd. Load cases, damage cases, key points and results are NOT backed up."})
@@ -706,7 +756,16 @@ def _before_replace(design, requested, confirmed, backup_path, scope="rooms"):
         return None
     if confirmed is not True or not backup_path:
         raise MaxsurfSafetyError("replacement requires confirm_replace and a new backup_path")
-    if scope != "rooms" or int(design.LoadCases.Count) or int(design.DamageCases.Count) > 1:
+    if scope != "rooms":
+        raise MaxsurfSafetyError("replacement disabled: room-only backup cannot preserve dependent load/damage/keypoint data; save in Maxsurf and use a new case name")
+    try:
+        counts = {name: getattr(design, name).Count for name in ("DamageCases", "KeyPoints")}
+        if any(type(count) is not int or count < 0 for count in counts.values()):
+            raise ValueError("invalid dependent collection count")
+        dependent = bool(_loadcase_names(design)) or counts["DamageCases"] > 1 or counts["KeyPoints"] > 0
+    except Exception as exc:
+        raise MaxsurfSafetyError("replacement disabled: dependent state could not be verified empty") from exc
+    if dependent:
         raise MaxsurfSafetyError("replacement disabled: room-only backup cannot preserve dependent load/damage/keypoint data; save in Maxsurf and use a new case name")
     target=workspace.resolve_target(backup_path,purpose="stability_checkpoint",
                                     overwrite=False,allowed_suffixes=(".htk",))

@@ -8,6 +8,8 @@ Every member used here was read from live ``ITypeInfo`` and is recorded in
 from __future__ import annotations
 
 import json
+import hashlib
+import math
 import os
 from typing import Any
 
@@ -77,6 +79,31 @@ def _validate_control_point(
             column=column,
             valid_range=f"1..{columns}",
         )
+
+
+def _coordinate(value: Any) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise MaxsurfValidationError("coordinates must be finite numbers",
+                                     received=repr(value))
+    try:
+        number = float(value)
+    except OverflowError as exc:
+        raise MaxsurfValidationError("coordinate is outside the finite range") from exc
+    if not math.isfinite(number):
+        raise MaxsurfValidationError("coordinates must be finite numbers",
+                                     received=repr(value))
+    return number
+
+
+def _verify_control_point(surface: Any, row: int, column: int,
+                          target: tuple[float, ...]) -> dict[str, Any]:
+    after = _control_point(surface, row, column)
+    actual = tuple(after[key] for key in ("longitudinal", "offset", "vertical"))
+    if actual != target:
+        raise MaxsurfCOMError("SetControlPoint did not store requested coordinates",
+                              requested_coordinates=target,
+                              actual_coordinates=actual)
+    return after
 
 
 def _enum_name(app: Any, prefix: str, value: Any) -> str | None:
@@ -205,16 +232,13 @@ def save_design(path: str = "", overwrite: bool = False) -> str:
     """WRITE_FILE. Save the design to an explicit path through Design.SaveAs.
 
     In-place Design.Save() is deliberately disabled: it overwrites the user's
-    open file with no backup, and the Modeler IDesign property that would
-    reveal the current path has not been proven, so a backup cannot be taken
-    safely yet. Always pass an absolute path inside a workspace root; an
+    open file with no backup. Always pass an absolute path inside a workspace root; an
     existing file requires overwrite=True.
     """
     if not path or not path.strip():
         raise MaxsurfSafetyError(
             "in-place save is disabled; pass an explicit target path",
-            reason="Design.Save() overwrites the open file with no backup and "
-                   "no proven way to locate it first",
+            reason="Design.Save() overwrites the open file with no backup",
             required="absolute .msd path inside a workspace root",
         )
     target = workspace.resolve_target(
@@ -223,15 +247,40 @@ def save_design(path: str = "", overwrite: bool = False) -> str:
     )
     audit.set_design_path(str(target))
     existed = target.exists()
+    before = None
+    if existed:
+        previous = target.stat()
+        before = (previous.st_mtime_ns, previous.st_ctime_ns,
+                  previous.st_size, hashlib.sha256(target.read_bytes()).hexdigest())
     app = com.connect("modeler")
     app.Design.SaveAs(str(target), overwrite)
     identity = _accept_design_identity(str(target))
+    try:
+        data = target.read_bytes()
+    except OSError as exc:
+        raise MaxsurfCOMError("SaveAs output could not be read", cause=exc,
+                              path=str(target), save_as_returned=True,
+                              session_identity=identity) from exc
+    if not data:
+        raise MaxsurfCOMError("SaveAs did not write a nonempty file",
+                              path=str(target), save_as_returned=True,
+                              session_identity=identity)
+    current = target.stat()
+    after = (current.st_mtime_ns, current.st_ctime_ns,
+             current.st_size, hashlib.sha256(data).hexdigest())
+    if before == after:
+        raise MaxsurfCOMError(
+            "SaveAs left the existing output unchanged; this call has no file-write evidence",
+            path=str(target), save_as_returned=True, session_identity=identity,
+            partial_state_possible=True)
     return com.to_json({
         "saved": str(target),
         "via": "Design.SaveAs",
         "overwrite": overwrite,
         "replaced_existing_file": existed,
         "session_identity": identity,
+        "file": {"path": str(target), "bytes": len(data),
+                 "sha256": hashlib.sha256(data).hexdigest()},
     })
 
 
@@ -279,9 +328,17 @@ def set_control_point(index: int, row: int, column: int,
     rows, columns = _control_point_limits(surface)
     _validate_control_point(row, column, rows, columns)
     before = _control_point(surface, row, column)
-    target = (float(longitudinal), float(offset), float(vertical))
+    target = tuple(_coordinate(v) for v in (longitudinal, offset, vertical))
     surface.SetControlPoint(row, column, *target)
-    after = _control_point(surface, row, column)
+    try:
+        after = _verify_control_point(surface, row, column, target)
+    except Exception as exc:
+        raise MaxsurfCOMError("control-point write returned but readback failed",
+                              cause=exc, index=index, row=row, column=column,
+                              set_control_point_calls=1,
+                              requested_coordinates=target,
+                              readback_error=getattr(exc, "details", {}),
+                              geometry_may_be_modified=True) from exc
     return com.to_json({
         "index": index,
         "row": row,
@@ -409,6 +466,8 @@ def set_control_points(surface_index: int, points_json: str) -> str:
     app = com.connect("modeler")
     surface, _count = _surface_at(app.Design.Surfaces, surface_index)
     rows, columns = _control_point_limits(surface)
+    if not isinstance(points_json, str):
+        raise MaxsurfValidationError("points_json must be a JSON string")
     try:
         points = json.loads(points_json)
     except ValueError as exc:
@@ -421,6 +480,7 @@ def set_control_points(surface_index: int, points_json: str) -> str:
         )
 
     prepared = []
+    targets = set()
     for position, point in enumerate(points):
         if not isinstance(point, dict):
             raise MaxsurfValidationError(
@@ -430,22 +490,30 @@ def set_control_points(surface_index: int, points_json: str) -> str:
             raise MaxsurfValidationError(
                 "each point requires 'r' and 'c'", position=position
             )
-        row = int(point["r"])
-        column = int(point["c"])
+        row = point["r"]
+        column = point["c"]
         _validate_control_point(row, column, rows, columns)
+        if (row, column) in targets:
+            raise MaxsurfValidationError("duplicate control-point target",
+                                         row=row, column=column, position=position)
+        targets.add((row, column))
         before = _control_point(surface, row, column)
         prepared.append((
             row,
             column,
-            float(point.get("x", before["longitudinal"])),
-            float(point.get("y", before["offset"])),
-            float(point.get("z", before["vertical"])),
+            _coordinate(point.get("x", before["longitudinal"])),
+            _coordinate(point.get("y", before["offset"])),
+            _coordinate(point.get("z", before["vertical"])),
         ))
 
     applied = 0
+    completed = 0
     for row, column, x_value, y_value, z_value in prepared:
         try:
             surface.SetControlPoint(row, column, x_value, y_value, z_value)
+            completed += 1
+            _verify_control_point(surface, row, column,
+                                  (x_value, y_value, z_value))
         except Exception as exc:  # noqa: BLE001
             raise MaxsurfCOMError(
                 "SetControlPoint failed part-way through a bulk update; the "
@@ -454,6 +522,9 @@ def set_control_points(surface_index: int, points_json: str) -> str:
                 surface_index=surface_index,
                 failed_at={"row": row, "column": column},
                 applied_before_failure=applied,
+                completed_set_calls=completed,
+                geometry_may_be_modified=True,
+                readback_error=getattr(exc, "details", {}),
                 requested=len(prepared),
             ) from exc
         applied += 1

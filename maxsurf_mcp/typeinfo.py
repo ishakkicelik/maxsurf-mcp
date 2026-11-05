@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import inspect
 from numbers import Integral, Real
-from typing import Any
+from typing import Any, NotRequired, TypedDict
 
 import pythoncom
 
@@ -39,6 +39,18 @@ _TYPE_KIND = {
 }
 
 SKIP_PREFIXES = ("_", "CLSID", "coclass_", "com_interface")
+
+
+class _ArgumentMetadata(TypedDict):
+    name: str
+    flags: int
+    input: bool
+    output: bool
+    optional: bool
+    has_default: bool
+    type_descriptor: str
+    default: NotRequired[str | int | float | bool | None]
+    default_repr: NotRequired[str]
 
 
 def _public(name: str) -> bool:
@@ -196,8 +208,8 @@ def _typeinfo_of(obj: Any):
 def _safe_doc(ti, memid: int) -> str | None:
     try:
         doc = ti.GetDocumentation(memid)
-        if doc and doc[0]:
-            return str(doc[0])
+        if doc and len(doc) > 1 and doc[1]:
+            return str(doc[1])
     except Exception:
         pass
     return None
@@ -259,7 +271,7 @@ def _enum_members(ti, count: int) -> list[dict]:
             vd = ti.GetVarDesc(index)
             memid = int(vd[0])
             names = list(ti.GetNames(memid))
-            name = str(names[0]) if names else _safe_doc(ti, memid)
+            name = str(names[0]) if names else ti.GetDocumentation(memid)[0]
             member = {
                 "name": name or f"memid_{memid}",
                 "value": _enum_value(vd[1]),
@@ -393,7 +405,10 @@ def _collect_from_typeinfo(ti, *, depth: int, visited: set[str]) -> dict:
         name = str(names[0]) if names else f"memid_{fd.memid}"
         params = [str(x) for x in names[1:]]
         kind = _INVOKE_KIND.get(fd.invkind, f"invoke_{fd.invkind}")
-        row = {
+        row: dict[
+            str, str | int | list[str] | list[_ArgumentMetadata]
+            | list[dict[str, str | int | None]]
+        ] = {
             "name": name,
             "kind": kind,
             "memid": int(fd.memid),
@@ -411,6 +426,36 @@ def _collect_from_typeinfo(ti, *, depth: int, visited: set[str]) -> dict:
             args = list(fd.args)
             row["arg_descriptors"] = [str(x) for x in args]
             row["return_descriptor"] = str(fd.rettype)
+            argument_specs: list[_ArgumentMetadata] = []
+            required = max(0, len(args) - max(0, int(fd.cParamsOpt)))
+            for index, descriptor in enumerate(args):
+                flags = int(descriptor[1])
+                optional = bool(flags & 48) or index >= required
+                argument: _ArgumentMetadata = {
+                    "name": params[index] if index < len(params) else f"arg{index + 1}",
+                    "flags": flags,
+                    "input": bool(flags & 1) or flags == 0,
+                    "output": bool(flags & 2),
+                    "optional": optional,
+                    "has_default": bool(flags & 32),
+                    "type_descriptor": str(descriptor[0]),
+                }
+                if flags & 32:
+                    default = descriptor[2]
+                    if isinstance(default, (str, int, float, bool, type(None))):
+                        argument["default"] = default
+                    else:
+                        argument["default_repr"] = str(default)
+                argument_specs.append(argument)
+            row["arguments"] = argument_specs
+            row["signature"] = (
+                f"{name}("
+                + ", ".join(
+                    argument["name"] + ("=?" if argument["optional"] else "")
+                    for argument in argument_specs
+                )
+                + ")"
+            )
             argument_refs = _argument_type_references(
                 ti,
                 name,

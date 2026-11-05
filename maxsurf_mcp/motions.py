@@ -32,6 +32,7 @@ import math
 import os
 from datetime import datetime, timezone
 from typing import Any
+from uuid import uuid4
 
 from . import audit, com, config, workspace
 from . import validation as val
@@ -69,7 +70,7 @@ OPTION_FIELDS: tuple[str, ...] = (
 )
 OPTION_UNITS = {
     "WaterDensity": "kg/m^3", "FrequenciesAuto": "-", "FrequenciesStart":
-    "rad/s", "FrequenciesEnd": "rad/s", "NumOfFrequencies": "-",
+    "native (unit unverified)", "FrequenciesEnd": "native (unit unverified)", "NumOfFrequencies": "-",
     "UseTransomTerms": "-", "WaveForceMethod": "-", "AddedResistanceMethod": "-",
 }
 
@@ -237,6 +238,8 @@ def configure_motions_analysis(
     stored values are returned; other geometry/mass checks are not relaxed.
     """
     spectrum_tolerance=val.number(spectrum_readback_rel_tol,"spectrum_readback_rel_tol",minimum=0,maximum=0.01)
+    if type(replace) is not bool:
+        raise MaxsurfValidationError("replace must be a boolean")
     headings=[val.number(x,"heading",minimum=0,maximum=360) for x in val.parsed(headings_deg_json,list,"headings")]
     speeds=[val.number(x,"speed",minimum=0) for x in val.parsed(speeds_knots_json,list,"speeds")]
     spectra=val.parsed(spectra_json,list,"spectra")
@@ -266,10 +269,24 @@ def configure_motions_analysis(
         spec_rows.append((val.name(spec.get("name",f"S{len(spec_rows)+1}")),kind,values))
     loc_rows=[]
     for loc in locations:
-        if not isinstance(loc,dict): raise MaxsurfValidationError("location must be an object")
+        if not isinstance(loc,dict) or set(loc)-{"name","x","y","z"}:
+            raise MaxsurfValidationError("location must contain only name, x, y, z")
         loc_rows.append((val.name(loc.get("name")),*[val.number(loc.get(k),k) for k in ("x","y","z")]))
+    for label, rows in (("Spectra", spec_rows), ("Locations", loc_rows)):
+        names = [row[0].casefold() for row in rows]
+        if len(names) != len(set(names)):
+            raise MaxsurfValidationError("duplicate supplied names", collection=label)
     app=com.connect("motions")
     design=_require_ready(app)
+    if not replace:
+        for label, rows in (("Spectra", spec_rows), ("Locations", loc_rows)):
+            if not rows:
+                continue
+            collection = getattr(design, label)
+            existing = {str(collection.Item(i).Name).casefold()
+                        for i in range(1, int(collection.Count)+1)}
+            if existing.intersection(row[0].casefold() for row in rows):
+                raise MaxsurfValidationError("name already exists", collection=label)
     from .stability import _constant
     atype=_constant(app,val.name(analysis_type))
     vtype=_constant(app,val.name(vessel_type))
@@ -277,6 +294,7 @@ def configure_motions_analysis(
         raise MaxsurfValidationError("wrong analysis/vessel enum family")
     types={kind:_constant(app,kind) for _,kind,_ in spec_rows}
     spectrum_readbacks=[]
+    location_readbacks=[]
     try:
         val.stored(design,"AnalysisType",atype)
         val.stored(design.Vessel,"VesselType",vtype)
@@ -315,14 +333,27 @@ def configure_motions_analysis(
             spectrum_readbacks.append({"name":name,"fields":readback,"relative_tolerance":spectrum_tolerance})
             val.stored(item,"Analyse",True)
         for row in loc_rows:
+            before = int(design.Locations.Count)
             design.Locations.Add(*row)
+            if int(design.Locations.Count) != before+1:
+                raise MaxsurfCOMError("location creation count mismatch")
+            item = design.Locations.Item(before+1)
+            actual = (str(item.Name), float(item.Position), float(item.Offset), float(item.Height))
+            if actual[0] != row[0] or any(
+                not math.isfinite(a) or not math.isclose(a, b, rel_tol=1e-8, abs_tol=1e-8)
+                for a, b in zip(actual[1:], row[1:])
+            ):
+                raise MaxsurfCOMError("location creation readback mismatch",
+                                      requested=row, actual=actual)
+            location_readbacks.append({"index":before+1,"name":actual[0],
+                                       "x_m":actual[1],"y_m":actual[2],"z_m":actual[3]})
     except Exception as exc:
         raise MaxsurfCOMError("Motions input update failed",cause=exc,
                               partial_state_possible=True) from exc
     return com.to_json({"module":"motions","vessel_written":written,
         "headings_deg":headings,"speeds_knots":speeds,"spectra_count":int(design.Spectra.Count),
         "analysis_type":analysis_type,"vessel_type":vessel_type,"verified":True,
-        "spectrum_readbacks":spectrum_readbacks})
+        "spectrum_readbacks":spectrum_readbacks,"location_readbacks":location_readbacks})
 
 
 @guarded(classification=Classification.EXECUTE_ANALYSIS, module="motions", channel=Channel.MCP_COM)
@@ -511,11 +542,17 @@ def export_motions_table(path: str, table: str, overwrite: bool = False) -> str:
     if table not in catalog:
         raise MaxsurfValidationError("unknown native Motions results table", available=sorted(catalog))
     target.parent.mkdir(parents=True, exist_ok=True)
-    design.ExportResults(catalog[table], str(target))
-    if not target.is_file() or target.stat().st_size == 0:
-        raise MaxsurfCOMError("native Motions export did not write a nonempty file", path=str(target))
-    data = target.read_bytes()
-    _require_numeric_table(data, summary=table=="skTabSummary")
+    staged = target.with_name(target.stem + "." + uuid4().hex + target.suffix)
+    try:
+        result = design.ExportResults(catalog[table], str(staged))
+        if result is False or not staged.is_file() or staged.stat().st_size == 0:
+            raise MaxsurfCOMError("native Motions export did not write a nonempty file", path=str(target))
+        data = staged.read_bytes()
+        _require_numeric_table(data, summary=table=="skTabSummary")
+        staged.replace(target)
+    finally:
+        if staged.exists():
+            staged.unlink()
     return com.to_json({"module": "motions", "path": str(target), "table": table,
                        "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(),
                        "source": "Design.ExportResults", "file_verified": True,

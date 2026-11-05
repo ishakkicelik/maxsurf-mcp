@@ -6,9 +6,14 @@ Connect Codex or Claude Desktop to locally installed **Maxsurf Modeler, Stabilit
 
 The MCP lets an assistant inspect models, set supported analysis inputs and request operations from Bentley's native applications. It runs on your Windows computer and uses your installed Maxsurf software.
 
-**Current build: 0.2.0-rc.5 · 90 default tools · technical preview.** This is preparation for the project's first public release. Supported operations and outstanding validation work are documented in [Capabilities](docs/CAPABILITIES.md) and [Release status](docs/RELEASE_STATUS.md).
+**Expanded source: 0.2.0-rc.5 · 144 default tools · technical preview.**
+The checkout adds native geometry formats, meshes and linked surfaces, analysis
+controls, exhaustive installed API discovery, and an opt-in metadata-validated
+automation extension. Older published archives retain their original contents.
+Coverage and explicit boundaries are documented in
+[Native automation](docs/NATIVE_AUTOMATION.md) and [Capabilities](docs/CAPABILITIES.md).
 
-[Installation guide](docs/INSTALL.md) · [Tool reference](docs/TOOLS.md) · [Verification](docs/VERIFICATION.md)
+[Installation guide](docs/INSTALL.md) · [Tool reference](docs/TOOLS.md) · [Verification](docs/VERIFICATION.md) · [Native API coverage](docs/NATIVE_AUTOMATION.md)
 
 ## Before you start
 

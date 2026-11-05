@@ -1,4 +1,4 @@
-﻿"""
+"""
 COM connection layer.
 
 Connection lifecycle, identity, and liveness live in
@@ -36,7 +36,8 @@ PROGID_HINTS = {
 
 KEYWORDS = ("maxsurf", "bentleymodeler", "bentleystability",
             "bentleyresistance", "bentleymotions", "formsys", "hydromax",
-            "hullspeed", "seakeeper", "multiframe", "workshop")
+            "hullspeed", "seakeeper", "multiframe", "workshop",
+            "bentleyvpp", "sectionmaker")
 
 
 def scan_registry() -> list[str]:
@@ -82,6 +83,8 @@ def session_for(module: str) -> Any:
 
 def reset(module: str | None = None) -> dict[str, Any]:
     """Drop cached sessions so the next call reconnects from scratch."""
+    from . import native_automation
+    native_automation.clear_handles(module)
     return session_module.get_manager().reset(module)
 
 

@@ -4,8 +4,8 @@ Only bounded, guarded adapters are registered by default; native acceptance
 limits are documented separately. Two tiers stay out of the
 production tool surface unless they are explicitly enabled:
 
-* ``MAXSURF_MCP_ENABLE_DIAGNOSTICS=1`` exposes raw COM access
-  (``com_get`` / ``com_set`` / ``com_invoke``).
+* ``MAXSURF_MCP_ENABLE_DIAGNOSTICS=1`` exposes raw COM access and guarded
+  native calls, enumeration, handle release, and helper construction.
 * ``MAXSURF_MCP_ENABLE_LEGACY=1`` exposes quarantined tools whose COM members
   live discovery did not find.
 """
@@ -26,6 +26,13 @@ from maxsurf_mcp import constants as comconstants
 from maxsurf_mcp import frame, grids, hydrostatics, modeler, modeler_data
 from maxsurf_mcp import motions, resistance, session, stability, surfaces
 from maxsurf_mcp import typeinfo, workspace, display, multiframe
+from maxsurf_mcp import modeler_files, meshes, surface_extras
+from maxsurf_mcp import resistance_controls, resistance_files
+from maxsurf_mcp import stability_controls, stability_files
+from maxsurf_mcp import motions_controls, motions_files, multiframe_controls
+from maxsurf_mcp import hydrostatic_controls
+from maxsurf_mcp import native_inventory, native_automation
+from maxsurf_mcp import native_objects
 
 
 VERSION = "0.2.0-rc.5"
@@ -41,6 +48,12 @@ _ok = com.to_json
 _try = com.first_available
 
 connect_maxsurf = com.connect_maxsurf
+discover_native_api = native_inventory.discover_native_api
+get_native_api_member = native_inventory.get_native_api_member
+native_call = native_automation.native_call
+native_enumerate = native_automation.native_enumerate
+release_native_handles = native_automation.release_native_handles
+create_native_object = native_objects.create_native_object
 reset_connection = com.reset_connection
 session_status = com.session_status
 list_progids = com.list_progids
@@ -58,6 +71,26 @@ create_library_surface = modeler.create_library_surface
 delete_surface = modeler.delete_surface
 set_control_points = modeler.set_control_points
 refresh_modeler_view = modeler.refresh_modeler_view
+export_modeler_file = modeler_files.export_modeler_file
+import_modeler_file = modeler_files.import_modeler_file
+get_surface_linked_geometry = surface_extras.get_surface_linked_geometry
+get_surface_area_properties = surface_extras.get_surface_area_properties
+create_linked_geometry_surface = surface_extras.create_linked_geometry_surface
+list_meshes = meshes.list_meshes
+get_mesh_statistics = meshes.get_mesh_statistics
+get_mesh_enums = meshes.get_mesh_enums
+mesh_surface_edge_length = meshes.mesh_surface_edge_length
+mesh_surface_parametric = meshes.mesh_surface_parametric
+set_mesh_properties = meshes.set_mesh_properties
+move_mesh = meshes.move_mesh
+rotate_mesh = meshes.rotate_mesh
+scale_mesh = meshes.scale_mesh
+flip_mesh = meshes.flip_mesh
+invert_mesh_normals = meshes.invert_mesh_normals
+repair_mesh = meshes.repair_mesh
+clean_mesh = meshes.clean_mesh
+combine_meshes = meshes.combine_meshes
+delete_mesh = meshes.delete_mesh
 
 move_surface = surfaces.move_surface
 rotate_surface = surfaces.rotate_surface
@@ -88,6 +121,11 @@ get_frame_of_reference = frame.get_frame_of_reference
 set_frame_of_reference = frame.set_frame_of_reference
 
 calculate_hydrostatics = hydrostatics.calculate_hydrostatics
+get_hydrostatic_settings = hydrostatic_controls.get_hydrostatic_settings
+set_hydrostatic_settings = hydrostatic_controls.set_hydrostatic_settings
+get_hydrostatic_results = hydrostatic_controls.get_hydrostatic_results
+transform_hydrostatics = hydrostatic_controls.transform_hydrostatics
+advanced_transform_hydrostatics = hydrostatic_controls.advanced_transform_hydrostatics
 transfer_modeler_to_stability = stability.transfer_modeler_to_stability
 save_stability_rooms = stability.save_stability_rooms
 run_stability_equilibrium = stability.run_stability_equilibrium
@@ -99,6 +137,12 @@ add_downflooding_points = stability.add_downflooding_points
 run_stability_gz = stability.run_stability_gz
 list_criteria_libraries = stability.list_criteria_libraries
 evaluate_stability_criteria = stability.evaluate_stability_criteria
+set_stability_trim = stability_controls.set_stability_trim
+set_stability_fluid_mode = stability_controls.set_stability_fluid_mode
+set_stability_density = stability_controls.set_stability_density
+define_conditional_keypoints = stability_controls.define_conditional_keypoints
+export_stability_results_table = stability_files.export_stability_results_table
+open_stability_companion = stability_files.open_stability_companion
 get_resistance_status = resistance.get_resistance_status
 transfer_modeler_to_resistance = resistance.transfer_modeler_to_resistance
 configure_resistance_analysis = resistance.configure_resistance_analysis
@@ -106,6 +150,12 @@ run_resistance_analysis = resistance.run_resistance_analysis
 get_resistance_results = resistance.get_resistance_results
 export_resistance_results = resistance.export_resistance_results
 calculate_free_surface = resistance.calculate_free_surface
+set_resistance_measurements = resistance_controls.set_resistance_measurements
+set_resistance_form_factor = resistance_controls.set_resistance_form_factor
+open_resistance_measurements = resistance_files.open_resistance_measurements
+save_resistance_measurements = resistance_files.save_resistance_measurements
+import_resistance_free_surface = resistance_files.import_resistance_free_surface
+export_resistance_free_surface = resistance_files.export_resistance_free_surface
 get_motions_status = motions.get_motions_status
 transfer_modeler_to_motions = motions.transfer_modeler_to_motions
 configure_motions_analysis = motions.configure_motions_analysis
@@ -119,6 +169,12 @@ export_stability_image = stability.export_stability_image
 inspect_modeler_display = display.inspect_modeler_display
 configure_modeler_rendering = display.configure_modeler_rendering
 capture_modeler_view = display.capture_modeler_view
+set_motions_frequency_range = motions_controls.set_motions_frequency_range
+set_motions_formulation = motions_controls.set_motions_formulation
+set_motions_vessel_settings = motions_controls.set_motions_vessel_settings
+export_motions_condition_table = motions_files.export_motions_condition_table
+export_motions_rao_text = motions_files.export_motions_rao_text
+import_motions_rao_text = motions_files.import_motions_rao_text
 
 get_multiframe_status = multiframe.get_multiframe_status
 list_multiframe_sections = multiframe.list_multiframe_sections
@@ -134,6 +190,15 @@ run_multiframe_analysis = multiframe.run_multiframe_analysis
 get_multiframe_results = multiframe.get_multiframe_results
 export_multiframe_results = multiframe.export_multiframe_results
 refresh_multiframe_view = multiframe.refresh_multiframe_view
+get_multiframe_element_controls = multiframe_controls.get_multiframe_element_controls
+set_multiframe_element_controls = multiframe_controls.set_multiframe_element_controls
+add_multiframe_element_loads = multiframe_controls.add_multiframe_element_loads
+set_multiframe_modal_controls = multiframe_controls.set_multiframe_modal_controls
+set_multiframe_units = multiframe_controls.set_multiframe_units
+read_multiframe_auxiliary_objects = multiframe_controls.read_multiframe_auxiliary_objects
+add_multiframe_node_masses = multiframe_controls.add_multiframe_node_masses
+add_multiframe_springs = multiframe_controls.add_multiframe_springs
+add_multiframe_node_link = multiframe_controls.add_multiframe_node_link
 
 get_results_table = grids.get_results_table
 get_stability_loadcase_table_headers = grids.get_stability_loadcase_table_headers
@@ -152,20 +217,34 @@ run_analysis = legacy.run_analysis
 #: Modules that own tools, in registration order.
 TOOL_MODULES = (
     com,
+    native_inventory,
     comconstants,
     typeinfo,
     modeler,
+    modeler_files,
     surfaces,
+    surface_extras,
+    meshes,
     modeler_data,
     frame,
     hydrostatics,
+    hydrostatic_controls,
     grids,
     stability,
+    stability_controls,
+    stability_files,
     resistance,
+    resistance_controls,
+    resistance_files,
     motions,
+    motions_controls,
+    motions_files,
     display,
     multiframe,
+    multiframe_controls,
     diagnostics,
+    native_automation,
+    native_objects,
     legacy,
 )
 
@@ -175,6 +254,11 @@ def register_tools() -> list[str]:
     registered: list[str] = []
     for module in TOOL_MODULES:
         registered.extend(module.register_tools(mcp) or [])
+    for tool in mcp._tool_manager.list_tools():
+        tool.parameters["additionalProperties"] = False
+    # FastMCP disables raw schema validation by default. Its Pydantic parser
+    # otherwise turns True into integer 1 before our native bounds checks.
+    mcp._mcp_server.call_tool(validate_input=True)(mcp.call_tool)
     return registered
 
 
@@ -229,14 +313,18 @@ def shutdown() -> dict[str, object] | None:
     on whichever thread the interpreter is shutting down from.
     """
     manager = session.get_manager()
+    def release_sessions():
+        native_automation.clear_handles()
+        return manager.reset()
+
     worker = comthread.peek_worker()
     if worker is not None and worker.is_running():
         # Never queue a release behind an abandoned native call or release its
         # interface from the wrong apartment. A timeout did NOT cancel Maxsurf.
         if not worker.describe().get("abandoned_operations"):
-            worker.run(manager.reset, description="release_sessions")
+            worker.run(release_sessions, description="release_sessions")
     else:
-        manager.reset()
+        release_sessions()
     return comthread.shutdown()
 
 

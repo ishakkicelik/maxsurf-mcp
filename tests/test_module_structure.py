@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -10,20 +13,34 @@ from maxsurf_mcp import config, guard
 
 MODULES = (
     "com",
+    "native_inventory",
     "constants",
     "typeinfo",
     "modeler",
+    "modeler_files",
     "surfaces",
+    "surface_extras",
+    "meshes",
     "modeler_data",
     "frame",
     "hydrostatics",
+    "hydrostatic_controls",
     "grids",
     "stability",
+    "stability_controls",
+    "stability_files",
     "resistance",
+    "resistance_controls",
+    "resistance_files",
     "motions",
+    "motions_controls",
+    "motions_files",
     "display",
     "multiframe",
+    "multiframe_controls",
     "diagnostics",
+    "native_automation",
+    "native_objects",
     "legacy",
 )
 
@@ -41,6 +58,60 @@ CORE_MODULES = (
 
 #: The production tool surface: everything registered with no tier gate.
 EXPECTED_OWNERS = {
+    "discover_native_api": "maxsurf_mcp.native_inventory",
+    "get_native_api_member": "maxsurf_mcp.native_inventory",
+    "get_hydrostatic_settings": "maxsurf_mcp.hydrostatic_controls",
+    "set_hydrostatic_settings": "maxsurf_mcp.hydrostatic_controls",
+    "get_hydrostatic_results": "maxsurf_mcp.hydrostatic_controls",
+    "transform_hydrostatics": "maxsurf_mcp.hydrostatic_controls",
+    "advanced_transform_hydrostatics": "maxsurf_mcp.hydrostatic_controls",
+    "set_stability_trim": "maxsurf_mcp.stability_controls",
+    "set_stability_fluid_mode": "maxsurf_mcp.stability_controls",
+    "set_stability_density": "maxsurf_mcp.stability_controls",
+    "define_conditional_keypoints": "maxsurf_mcp.stability_controls",
+    "export_stability_results_table": "maxsurf_mcp.stability_files",
+    "open_stability_companion": "maxsurf_mcp.stability_files",
+    "set_motions_frequency_range": "maxsurf_mcp.motions_controls",
+    "set_motions_formulation": "maxsurf_mcp.motions_controls",
+    "set_motions_vessel_settings": "maxsurf_mcp.motions_controls",
+    "export_motions_condition_table": "maxsurf_mcp.motions_files",
+    "export_motions_rao_text": "maxsurf_mcp.motions_files",
+    "import_motions_rao_text": "maxsurf_mcp.motions_files",
+    "get_multiframe_element_controls": "maxsurf_mcp.multiframe_controls",
+    "set_multiframe_element_controls": "maxsurf_mcp.multiframe_controls",
+    "add_multiframe_element_loads": "maxsurf_mcp.multiframe_controls",
+    "set_multiframe_modal_controls": "maxsurf_mcp.multiframe_controls",
+    "set_multiframe_units": "maxsurf_mcp.multiframe_controls",
+    "read_multiframe_auxiliary_objects": "maxsurf_mcp.multiframe_controls",
+    "add_multiframe_node_masses": "maxsurf_mcp.multiframe_controls",
+    "add_multiframe_springs": "maxsurf_mcp.multiframe_controls",
+    "add_multiframe_node_link": "maxsurf_mcp.multiframe_controls",
+    "export_modeler_file": "maxsurf_mcp.modeler_files",
+    "import_modeler_file": "maxsurf_mcp.modeler_files",
+    "get_surface_linked_geometry": "maxsurf_mcp.surface_extras",
+    "get_surface_area_properties": "maxsurf_mcp.surface_extras",
+    "create_linked_geometry_surface": "maxsurf_mcp.surface_extras",
+    "list_meshes": "maxsurf_mcp.meshes",
+    "get_mesh_statistics": "maxsurf_mcp.meshes",
+    "get_mesh_enums": "maxsurf_mcp.meshes",
+    "mesh_surface_edge_length": "maxsurf_mcp.meshes",
+    "mesh_surface_parametric": "maxsurf_mcp.meshes",
+    "set_mesh_properties": "maxsurf_mcp.meshes",
+    "move_mesh": "maxsurf_mcp.meshes",
+    "rotate_mesh": "maxsurf_mcp.meshes",
+    "scale_mesh": "maxsurf_mcp.meshes",
+    "flip_mesh": "maxsurf_mcp.meshes",
+    "invert_mesh_normals": "maxsurf_mcp.meshes",
+    "repair_mesh": "maxsurf_mcp.meshes",
+    "clean_mesh": "maxsurf_mcp.meshes",
+    "combine_meshes": "maxsurf_mcp.meshes",
+    "delete_mesh": "maxsurf_mcp.meshes",
+    "set_resistance_measurements": "maxsurf_mcp.resistance_controls",
+    "set_resistance_form_factor": "maxsurf_mcp.resistance_controls",
+    "open_resistance_measurements": "maxsurf_mcp.resistance_files",
+    "save_resistance_measurements": "maxsurf_mcp.resistance_files",
+    "import_resistance_free_surface": "maxsurf_mcp.resistance_files",
+    "export_resistance_free_surface": "maxsurf_mcp.resistance_files",
     "get_multiframe_status": "maxsurf_mcp.multiframe",
     "list_multiframe_sections": "maxsurf_mcp.multiframe",
     "read_multiframe_model": "maxsurf_mcp.multiframe",
@@ -139,6 +210,10 @@ GATED_OWNERS = {
     "com_get": ("maxsurf_mcp.diagnostics", guard.TIER_DIAGNOSTICS),
     "com_set": ("maxsurf_mcp.diagnostics", guard.TIER_DIAGNOSTICS),
     "com_invoke": ("maxsurf_mcp.diagnostics", guard.TIER_DIAGNOSTICS),
+    "native_call": ("maxsurf_mcp.native_automation", guard.TIER_DIAGNOSTICS),
+    "native_enumerate": ("maxsurf_mcp.native_automation", guard.TIER_DIAGNOSTICS),
+    "release_native_handles": ("maxsurf_mcp.native_automation", guard.TIER_DIAGNOSTICS),
+    "create_native_object": ("maxsurf_mcp.native_objects", guard.TIER_DIAGNOSTICS),
     "parametric_transform": ("maxsurf_mcp.legacy", guard.TIER_LEGACY),
     "export_model": ("maxsurf_mcp.legacy", guard.TIER_LEGACY),
     "run_analysis": ("maxsurf_mcp.legacy", guard.TIER_LEGACY),
@@ -155,6 +230,73 @@ def _registered() -> dict[str, object]:
 
 
 class ModuleStructureTests(unittest.TestCase):
+    def test_exact_tier_surfaces_in_fresh_processes(self):
+        script = """
+import inspect
+import json
+import server
+try:
+    tools = server.mcp._tool_manager.list_tools()
+    print(json.dumps({
+        tool.name: {
+            "owner": tool.fn.__module__,
+            "export": tool.fn.maxsurf_tool is getattr(server, tool.name),
+            "async": inspect.iscoroutinefunction(tool.fn) and tool.is_async,
+            "tier": tool.fn.maxsurf_tier,
+            "schema": tool.parameters,
+        } for tool in tools
+    }))
+finally:
+    server.shutdown()
+"""
+        for diagnostics, legacy in ((False, False), (True, False),
+                                    (False, True), (True, True)):
+            with self.subTest(diagnostics=diagnostics, legacy=legacy):
+                environment = dict(os.environ)
+                environment[config.ENABLE_DIAGNOSTICS_VAR] = str(int(diagnostics))
+                environment[config.ENABLE_LEGACY_VAR] = str(int(legacy))
+                process = subprocess.run(
+                    [sys.executable, "-c", script],
+                    cwd=Path(__file__).resolve().parents[1],
+                    env=environment, capture_output=True, text=True, timeout=60,
+                )
+                self.assertEqual(process.returncode, 0, process.stderr)
+                actual = json.loads(process.stdout)
+                expected = {name: (owner, None)
+                            for name, owner in EXPECTED_OWNERS.items()}
+                expected.update({
+                    name: (owner, tier)
+                    for name, (owner, tier) in GATED_OWNERS.items()
+                    if ((tier == guard.TIER_DIAGNOSTICS and diagnostics)
+                        or (tier == guard.TIER_LEGACY and legacy))
+                })
+                self.assertEqual(len(EXPECTED_OWNERS), 144)
+                self.assertEqual(set(actual), set(expected))
+                for name, (owner, tier) in expected.items():
+                    with self.subTest(tool=name):
+                        self.assertEqual(actual[name]["owner"], owner)
+                        self.assertEqual(actual[name]["tier"], tier)
+                        self.assertTrue(actual[name]["export"])
+                        self.assertTrue(actual[name]["async"])
+                        self.assertIs(actual[name]["schema"]["additionalProperties"], False)
+                if diagnostics:
+                    self.assertEqual(actual["native_enumerate"]["schema"], {
+                        "properties": {
+                            "enum_handle": {"title": "Enum Handle", "type": "string"},
+                            "operation": {"default": "next", "title": "Operation", "type": "string"},
+                            "count": {"default": 1, "title": "Count", "type": "integer"},
+                            "module": {"default": "modeler", "title": "Module", "type": "string"},
+                            "acknowledge_native_effects": {
+                                "default": False, "title": "Acknowledge Native Effects",
+                                "type": "boolean",
+                            },
+                        },
+                        "required": ["enum_handle"],
+                        "title": "native_enumerateArguments",
+                        "type": "object",
+                        "additionalProperties": False,
+                    })
+
     def test_application_modules_import_and_expose_registration(self):
         for module_name in MODULES:
             with self.subTest(module=module_name):

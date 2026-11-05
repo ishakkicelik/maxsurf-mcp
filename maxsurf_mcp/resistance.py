@@ -350,6 +350,15 @@ def _read_results(app: Any, design: Any, max_points: int) -> dict[str, Any]:
             if any(row[f]["status"] != "read" for f in ("v", "Rt", "Power")):
                 raise MaxsurfAnalysisError("required Resistance outputs are non-finite or unreadable")
             collection_v = float(results.Velocity(index))
+            if not math.isfinite(collection_v) or not math.isclose(
+                row["v"]["value"], collection_v, rel_tol=1e-8, abs_tol=1e-8
+            ):
+                raise MaxsurfAnalysisError(
+                    "Resistance row and collection velocities disagree",
+                    method=method["name"], index=index,
+                    row_velocity=row["v"]["value"],
+                    collection_velocity=collection_v,
+                )
             row["collection_velocity"] = {
                 "value": collection_v, "unit": "m/s",
                 "knots": collection_v / MPS_PER_KNOT, "status": "read",

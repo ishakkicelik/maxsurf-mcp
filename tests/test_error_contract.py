@@ -34,6 +34,8 @@ CONNECTION_INDEPENDENT_TOOLS = frozenset({
     "reset_connection", "session_status",
     # lists the shipped .hcr criteria files on disk; no COM session needed
     "list_criteria_libraries",
+    # Installed type libraries remain inspectable without application sessions.
+    "discover_native_api",
 })
 
 

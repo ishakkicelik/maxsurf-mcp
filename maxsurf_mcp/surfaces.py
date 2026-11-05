@@ -30,9 +30,9 @@ Boolean property, "whether or not the surface is split in the body plan view" --
 a drawing setting. It is exposed with the other properties, not here.
 
 Writability is never assumed. The help prints ``[= value]`` on every property
-page including read-only ones, so each property put is attempted, verified by
-reading the value back, and reported per field. Nothing raises merely because
-Maxsurf declined to store something.
+page including read-only ones. Known GET-only members are refused before
+writes; other property puts are attempted, read back, and reported per field.
+Visibility refusals retain the per-surface ``not_stored`` contract.
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ SURFACE_PROPERTIES: dict[str, tuple[str, str, str | None]] = {
 
 #: Properties that describe the surface rather than configure it. Reported, and
 #: refused on write so a caller cannot believe they renumbered a surface.
-READ_ONLY_PROPERTIES = ("id",)
+READ_ONLY_PROPERTIES = ("id", "assembly_name")
 
 #: Enum families resolved from the generated type library at runtime. Values are
 #: never hard-coded; only the prefixes appear here.
@@ -204,11 +204,13 @@ def _transform(app: Any, index: int, operation: str, call: Any,
 
     count_after = int(surfaces.Count)
     created = count_after - count_before
-    if duplicate and created < 1:
+    expected_created = arguments.get("times", 1) if duplicate else 0
+    if duplicate and created != expected_created:
         raise MaxsurfCOMError(
-            f"{operation} was asked to duplicate but the surface count did not "
-            f"grow",
+            (f"{operation} duplicate count did not grow" if created < 1 else
+             f"{operation} did not create exactly the requested duplicates"),
             operation=operation, index=index,
+            expected_created=expected_created,
             count_before=count_before, count_after=count_after,
         )
     if not duplicate and created != 0:
@@ -220,6 +222,75 @@ def _transform(app: Any, index: int, operation: str, call: Any,
         )
 
     after = _net_extent(surfaces(index))
+    import math
+
+    # Extents prove affine translations and axis scaling/reflection, not
+    # arbitrary rotations or surface fairness. Never equate these with shape
+    # quality or continuity.
+    expected = None
+    if duplicate:
+        expected = before
+    elif operation in ("Move", "ReScale", "Flip"):
+        expected = dict(before)
+        for axis, suffix, coordinate in (
+            ("longitudinal", "x", "msDTLongitudinal"),
+            ("offset", "y", "msDTTransverse"),
+            ("vertical", "z", "msDTVertical"),
+        ):
+            factor, shift = 1.0, 0.0
+            if operation == "Move":
+                shift = arguments[suffix]
+            elif operation == "ReScale":
+                factor = arguments["scale_" + suffix]
+                shift = arguments["centre_" + suffix] * (1 - factor)
+            elif arguments["direction"]["enum_name"] == coordinate:
+                factor, shift = -1.0, 2 * arguments["plane_location"]
+            endpoints = [before[axis][key] * factor + shift
+                         for key in ("min", "max")]
+            expected[axis] = {
+                "min": min(endpoints), "max": max(endpoints),
+                "centroid": before[axis]["centroid"] * factor + shift,
+            }
+    if expected is not None and (
+        any(before[key] != after[key] for key in ("rows", "columns", "points"))
+        or any(not math.isclose(after[axis][key], expected[axis][key],
+                                rel_tol=1e-9, abs_tol=1e-8)
+               for axis in ("longitudinal", "offset", "vertical")
+               for key in ("min", "max", "centroid"))
+    ):
+        raise MaxsurfCOMError(
+            "native transform did not match the expected control-net extent",
+            operation=operation, extent_expected=expected, extent_after=after,
+            partial_state_possible=True,
+        )
+    created_extent_verified = duplicate and operation in ("Move", "Flip")
+    if created_extent_verified:
+        for step, created_index in enumerate(
+            range(count_before + 1, count_after + 1), start=1
+        ):
+            clone = _net_extent(surfaces(created_index))
+            for axis, suffix, coordinate in (
+                ("longitudinal", "x", "msDTLongitudinal"),
+                ("offset", "y", "msDTTransverse"),
+                ("vertical", "z", "msDTVertical"),
+            ):
+                factor, shift = 1.0, 0.0
+                if operation == "Move":
+                    shift = step * arguments[suffix]
+                elif arguments["direction"]["enum_name"] == coordinate:
+                    factor, shift = -1.0, 2 * arguments["plane_location"]
+                endpoints = [before[axis][key] * factor + shift
+                             for key in ("min", "max")]
+                values = {"min": min(endpoints), "max": max(endpoints),
+                          "centroid": before[axis]["centroid"] * factor + shift}
+                if any(not math.isclose(clone[axis][key], values[key],
+                                        rel_tol=1e-9, abs_tol=1e-8)
+                       for key in values):
+                    raise MaxsurfCOMError(
+                        "duplicate control-net extent did not match transform",
+                        operation=operation, created_index=created_index,
+                        partial_state_possible=True,
+                    )
     return com.to_json({
         "operation": operation,
         "index": index,
@@ -235,6 +306,9 @@ def _transform(app: Any, index: int, operation: str, call: Any,
         "extent_before": before,
         "extent_after": after,
         "extent_delta": _extent_delta(before, after),
+        "extent_readback_verified": expected is not None,
+        "extent_verification_scope": "source_control_net_extent",
+        "created_extents_verified": created_extent_verified,
     })
 
 
@@ -719,6 +793,18 @@ def add_quadrilateral_surface(name: str, symmetry: str,
 #: msDirectionType, ``symmetry`` an msShapeSymmetryType; both are named in
 #: ENUM_ARGUMENTS so they are resolved from names rather than passed as numbers.
 PARAMETRIC_SHAPES: dict[str, tuple[str, ...]] = {
+    "tube180": ("name", "orient", "close_ends", "symmetry", "length",
+                "radius_outer", "radius_inner", "centre_long",
+                "centre_offset", "centre_height"),
+    "tube90": ("name", "orient", "close_ends", "symmetry", "length",
+               "radius_outer", "radius_inner", "centre_long",
+               "centre_offset", "centre_height"),
+    "tube180_start_end": ("name", "close_ends", "symmetry", "radius_outer",
+                          "radius_inner", "start_long", "start_offset",
+                          "start_height", "end_long", "end_offset", "end_height"),
+    "tube90_start_end": ("name", "close_ends", "symmetry", "radius_outer",
+                         "radius_inner", "start_long", "start_offset",
+                         "start_height", "end_long", "end_offset", "end_height"),
     "box": ("name", "orient", "close_ends", "symmetry", "length", "width",
             "height", "centre_long", "centre_offset", "centre_height"),
     "box_start_end": ("name", "close_ends", "symmetry", "width", "height",
@@ -744,6 +830,10 @@ PARAMETRIC_SHAPES: dict[str, tuple[str, ...]] = {
 
 #: COM member behind each shape.
 PARAMETRIC_MEMBERS: dict[str, str] = {
+    "tube180": "AddTube180d",
+    "tube90": "AddTube90d",
+    "tube180_start_end": "AddTube180dStartEnd",
+    "tube90_start_end": "AddTube90dStartEnd",
     "box": "AddBox",
     "box_start_end": "AddBoxStartEnd",
     "cylinder180": "AddCylinder180d",
@@ -771,20 +861,25 @@ def add_parametric_surface(shape: str, parameters_json: str) -> str:
     and then moved and scaled into position.
 
     shape is one of: box, box_start_end, cylinder180, cylinder180_start_end,
-    cylinder90, cylinder90_start_end, spheroid, hemispheroid.
+    cylinder90, cylinder90_start_end, spheroid, hemispheroid, tube180, tube90,
+    tube180_start_end, tube90_start_end.
 
     parameters_json supplies that shape's arguments by name. Call with an
     unknown shape, or with arguments missing, to be told exactly which names
     that shape expects and in what order. orient and symmetry take enum member
     names (msDT..., msSST...), never numbers; lengths are metres.
     """
-    key = (shape or "").strip().casefold()
+    if not isinstance(shape, str):
+        raise MaxsurfValidationError("shape must be a string")
+    key = shape.strip().casefold()
     if key not in PARAMETRIC_SHAPES:
         raise MaxsurfValidationError(
             "unknown parametric shape", requested=shape,
             available=sorted(PARAMETRIC_SHAPES),
         )
     expected = PARAMETRIC_SHAPES[key]
+    if not isinstance(parameters_json, str):
+        raise MaxsurfValidationError("parameters_json must be a JSON string")
     try:
         supplied = json.loads(parameters_json)
     except ValueError as exc:
@@ -826,7 +921,7 @@ def add_parametric_surface(shape: str, parameters_json: str) -> str:
             resolved[name] = value
         elif name in ENUM_ARGUMENTS:
             enum = _resolve_enum(app, ENUM_PREFIXES[ENUM_ARGUMENTS[name]],
-                                 str(value), name)
+                                 value, name)
             arguments.append(enum["value"])
             resolved[name] = enum
         else:
@@ -835,6 +930,18 @@ def add_parametric_surface(shape: str, parameters_json: str) -> str:
             resolved[name] = number
 
     member = PARAMETRIC_MEMBERS[key]
+    if key.startswith("tube"):
+        if not 0 < resolved["radius_inner"] < resolved["radius_outer"]:
+            raise MaxsurfValidationError(
+                "tube radii must satisfy 0 < radius_inner < radius_outer"
+            )
+        if "length" in resolved and resolved["length"] <= 0:
+            raise MaxsurfValidationError("tube length must be positive")
+        if "start_long" in resolved and all(
+            resolved["start_" + axis] == resolved["end_" + axis]
+            for axis in ("long", "offset", "height")
+        ):
+            raise MaxsurfValidationError("tube start and end must differ")
     count_before = int(surfaces.Count)
     getattr(surfaces, member)(*arguments)
     count_after = int(surfaces.Count)
@@ -912,23 +1019,57 @@ def bond_surfaces(first_index: int, first_edge: str, second_index: int,
     bond = _resolve_enum(app, ENUM_PREFIXES["continuity"], continuity,
                          "continuity")
     names = (first.Name, second.Name)
+    previous_names = ([str(surfaces(index).Name) for index in range(1, count_before + 1)]
+                      if insert_connecting_surface else [])
     surfaces.Bond(first_index, edges["first_edge"]["value"], second_index,
                   edges["second_edge"]["value"], bond["value"],
                   bool(insert_connecting_surface))
     count_after = int(surfaces.Count)
+    created_names: list[str] = []
+    if insert_connecting_surface:
+        after_surfaces = [surfaces(index) for index in range(1, count_after + 1)]
+        after_names = [str(surface.Name) for surface in after_surfaces]
+        created = {str(surface.Name): surface for surface in after_surfaces
+                   if str(surface.Name) not in previous_names}
+        created_names = list(created)
     first_target = {"surface": str(first.BondedToWhichSurface(edges["first_edge"]["value"])),
                     "edge": int(first.BondedToWhichEdge(edges["first_edge"]["value"]))}
     second_target = {"surface": str(second.BondedToWhichSurface(edges["second_edge"]["value"])),
                      "edge": int(second.BondedToWhichEdge(edges["second_edge"]["value"]))}
     if insert_connecting_surface:
-        verified = (count_after > count_before and
-                    first_target["surface"] not in ("", "Unbonded") and first_target["edge"] in range(1, 5) and
-                    second_target["surface"] not in ("", "Unbonded") and second_target["edge"] in range(1, 5))
+        topology = {
+            name: {edge: (str(connector.BondedToWhichSurface(edge)),
+                          int(connector.BondedToWhichEdge(edge)))
+                   for edge in range(1, 5)}
+            for name, connector in created.items()
+        }
+        first_pair = (first_target["surface"], first_target["edge"])
+        second_pair = (second_target["surface"], second_target["edge"])
+        first_verified = (topology.get(first_pair[0], {}).get(first_pair[1])
+                          == (names[0], edges["first_edge"]["value"]))
+        second_verified = (topology.get(second_pair[0], {}).get(second_pair[1])
+                           == (names[1], edges["second_edge"]["value"]))
+        connected = {first_pair[0]} if first_verified else set()
+        pending = list(connected)
+        while pending:
+            current = pending.pop()
+            for edge, (neighbor, neighbor_edge) in topology[current].items():
+                if (neighbor not in connected and
+                        topology.get(neighbor, {}).get(neighbor_edge) == (current, edge)):
+                    connected.add(neighbor)
+                    pending.append(neighbor)
+        verified = (count_after > count_before
+                    and len(set(previous_names)) == count_before
+                    and len(set(after_names)) == count_after
+                    and set(previous_names).issubset(after_names)
+                    and len(created) == count_after - count_before
+                    and first_verified and second_verified
+                    and second_pair[0] in connected)
     else:
         verified = (count_after == count_before and
                     first_target == {"surface": names[1], "edge": edges["second_edge"]["value"]} and
                     second_target == {"surface": names[0], "edge": edges["first_edge"]["value"]})
-    if not verified:
+    if not verified and not insert_connecting_surface:
         raise MaxsurfCOMError("native bond request was not verified by reciprocal readback",
                               first_target=first_target, second_target=second_target,
                               count_before=count_before, count_after=count_after,
@@ -939,7 +1080,9 @@ def bond_surfaces(first_index: int, first_edge: str, second_index: int,
         "second": {"index": second_index, "name": names[1],
                    "edge": edges["second_edge"]},
         "continuity": bond,
-        "bond_readback_verified": True,
+        "bond_readback_verified": bool(verified),
+        "connector_topology_verified": bool(verified) if insert_connecting_surface else None,
+        "created_surface_names": created_names,
         "continuity_readback": "not_exposed_by_native_api",
         "insert_connecting_surface": bool(insert_connecting_surface),
         "count_before": count_before,
@@ -958,12 +1101,29 @@ def unbond_surface(index: int, edge: str) -> str:
     resolved = _resolve_enum(app, ENUM_PREFIXES["edge"], edge, "edge")
     name = surface.Name
     surfaces.Unbond(index, resolved["value"])
+    target = {
+        "surface": str(surface.BondedToWhichSurface(resolved["value"])),
+        "edge": int(surface.BondedToWhichEdge(resolved["value"])),
+    }
+    null_edge = _resolve_enum(app, ENUM_PREFIXES["edge"], "msEdgeNull",
+                              "unbonded_edge")
+    if int(surfaces.Count) != count_before or (
+        target["surface"] not in ("", "Unbonded")
+        or target["edge"] != null_edge["value"]
+    ):
+        raise MaxsurfCOMError(
+            "native unbond request was not verified by readback",
+            target=target, count_before=count_before,
+            count_after=int(surfaces.Count), partial_state_possible=True,
+        )
     return com.to_json({
         "index": index,
         "name": name,
         "edge": resolved,
         "count_before": count_before,
         "count_after": int(surfaces.Count),
+        "bond_readback_verified": True,
+        "target": target,
     })
 
 

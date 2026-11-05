@@ -105,6 +105,34 @@ class _DispatchObject:
 
 
 class TypeInfoReferenceTests(unittest.TestCase):
+    def test_reports_parameter_default_when_optional_count_is_zero(self):
+        # Given: native metadata stores optionality in flags, not cParamsOpt.
+        owner = _OwnerTypeInfo(1, None, pythoncom.VT_I4)
+        owner.func.args = [(pythoncom.VT_I4, 49, 100)]
+        owner.GetNames = lambda _memid: ("ResetViewZoom", "zoomPC")
+
+        # When: the interface is inspected without invoking the member.
+        result = typeinfo.describe(_DispatchObject(owner), inherited_depth=0)
+
+        # Then: clients can distinguish an optional input and its default.
+        argument = result["methods"][0]["arguments"][0]
+        self.assertTrue(argument["optional"])
+        self.assertTrue(argument["input"])
+        self.assertFalse(argument["output"])
+        self.assertEqual(argument["default"], 100)
+        self.assertEqual(result["methods"][0]["signature"], "ResetViewZoom(zoomPC=?)")
+
+    def test_reads_help_field_instead_of_member_name(self):
+        # Given: COM documentation has separate name and help fields.
+        owner = _OwnerTypeInfo(1, None, pythoncom.VT_I4)
+        owner.GetDocumentation = lambda _memid: ("NativeName", "native help", 0, None)
+
+        # When: the native help field is requested.
+        help_text = typeinfo._safe_doc(owner, 42)
+
+        # Then: it is the documented field, not the member name.
+        self.assertEqual(help_text, owner.GetDocumentation(42)[1])
+
     def test_resolves_dynamic_enum_handle_and_reports_every_value(self):
         handle = 987654
         enum_ti = _ReferencedTypeInfo(

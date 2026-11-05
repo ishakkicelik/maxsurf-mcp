@@ -45,7 +45,7 @@ RESULT_FIELDS: tuple[str, ...] = (
     "Displacement", "Volume", "Draft", "ImmersedDepth",
     "LWL", "BeamWL", "WSA", "WaterplaneArea", "MaxCrossSectArea",
     "Cb", "Cp", "Cm", "Cwp",
-    "LCB", "LCBasFraction", "LCF", "LCFasFraction",
+    "LCB", "LCF",
     "KB", "KG", "BMt", "BMl", "GMt", "GMl", "KMt", "KMl",
     "MTc", "TPC", "RM", "LBG", "AG", "FG", "Flare",
 )
@@ -164,11 +164,8 @@ def _set_trimming(app: Any) -> dict[str, Any]:
     """Turn trimming on, and report honestly whether that worked.
 
     The Modeler manual states trimming affects hydrostatic results, not only the
-    drawing, so an untrimmed model can produce a displacement that includes
-    geometry the real hull does not have. The help calls Trimming a Boolean
-    property, but its ``[= value]`` syntax line is page boilerplate present on
-    read-only members too, so writability is not proven and a failure here is
-    reported rather than raised.
+    drawing. Installed 2026 IApplication proves a Boolean getter and setter.
+    A failure is retained in the calculation's precondition evidence.
     """
     before = com.probe(app, "Trimming")
     report: dict[str, Any] = {
@@ -195,15 +192,7 @@ def _set_trimming(app: Any) -> dict[str, Any]:
 
 
 def _read_precision(app: Any) -> dict[str, Any]:
-    """Try to report the precision setting, which drives the station count.
-
-    ``Preferences.Precision`` is documented as *"Sets the app's level of
-    precision"* with no return value and an ``msSurfacePrecision`` argument, so
-    it is a put-only parameterised property: the station count that governs
-    hydrostatic accuracy cannot be read back through automation. Attempted
-    anyway, and reported as unavailable rather than omitted, because a caller
-    comparing two runs needs to know this was not verified.
-    """
+    """Read Precision, proven get/put by the installed 2026 IPreferences."""
     preferences = com.probe(app, "Preferences")
     if preferences["status"] != "read":
         return {"value": None, "status": preferences["status"],
@@ -214,9 +203,8 @@ def _read_precision(app: Any) -> dict[str, Any]:
     return {
         "value": None,
         "status": "unavailable",
-        "detail": "Preferences.Precision is documented as a put-only "
-                  "parameterised property (msSurfacePrecision argument, no "
-                  "return value), so the active precision cannot be read back",
+        "detail": "Preferences.Precision has a native getter, but its value "
+                  "could not be read on this connection",
     }
 
 
@@ -342,6 +330,7 @@ def calculate_hydrostatics(density: float = 1025.0, vcg: float = 0.0) -> str:
                    "vcg": vcg, "vcg_unit": "m"},
         "vcg_contract": {
             "status": "neutral" if abs(vcg) <= 1e-12 else "unproven",
+            "datum_status": "unproven",
             "detail": "vcg=0 does not depend on an unresolved sign transform"
             if abs(vcg) <= 1e-12 else
             "live Maxsurf 2025 returned KG=-vcg with the baseline active; "
